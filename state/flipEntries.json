@@ -14,13 +14,5 @@
   "XRPUSDT:60": {
     "bias": 1,
     "price": 1.4631
-  },
-  "BNBUSDT:60": {
-    "bias": 1,
-    "price": 726.4
-  },
-  "DOGEUSDT:60": {
-    "bias": 1,
-    "price": 0.08512
   }
 }

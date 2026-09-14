@@ -123,37 +123,6 @@
       "targetNear": 1.4709500070833335
     }
   },
-  "BNBUSDT": {
-    "symbol": "BNBUSDT",
-    "bias": 1,
-    "entry": 726.4,
-    "stop": 720.292258457549,
-    "initialStop": 720.292258457549,
-    "t1": 732.507741542451,
-    "t2": 738.6154830849019,
-    "t3": 744.7232246273529,
-    "qtyTotal": 27.53,
-    "qtyRemaining": 27.53,
-    "qtyT1": 11.012,
-    "qtyT2": 9.6355,
-    "qtyT3": 6.8825,
-    "margin": 1999.7792000000002,
-    "notional": 19997.792,
-    "riskAmt": 168.14612466367552,
-    "filled": {
-      "t1": false,
-      "t2": false,
-      "t3": false
-    },
-    "breakeven": false,
-    "openedAt": 1789416000000,
-    "score": 52,
-    "fibImpulse": "up",
-    "liqClusterNote": {
-      "stopNear": 723.0004833333334,
-      "targetNear": 747.09965
-    }
-  },
   "DOGEUSDT": {
     "symbol": "DOGEUSDT",
     "bias": 1,

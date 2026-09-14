@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "symbol": "BNBUSDT",
+    "bias": 1,
+    "entry": 726.4,
+    "exit": 720.292258457549,
+    "pnl": -168.14612466367552,
+    "reason": "stop hit",
+    "openedAt": 1789416000000,
+    "closedAt": 1789423200000,
+    "score": 52
+  }
+]
