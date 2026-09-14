@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>UltimateTradingBot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Palette matched to BTCLiveBoard ("the first page") so this reads as part
+     of the same family — --bot is this page's own identity colour (its tab
+     tint in the hub), no equivalent slot on the reference page. */
+  :root{
+    --bg:#070a09; --panel:#0e1412; --panel2:#121a17; --border:#1b2320;
+    --text-primary:#eef3f0; --text-secondary:#93a49c; --text-tertiary:#5c6b64;
+    --up:#35ffb0; --down:#ff4d6a; --warn:#ffc857; --bot:#b98bff;
+    --mono:'JetBrains Mono','SF Mono',Consolas,monospace;
+    --sans:'Inter',system-ui,sans-serif;
+  }
+  *{ box-sizing:border-box; }
+  html,body{
+    margin:0; padding:0; min-height:100%;
+    background:var(--bg); color:var(--text-primary);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+  }
+  body{ padding:16px 16px max(16px, env(safe-area-inset-bottom)); padding-top:max(16px, env(safe-area-inset-top)); }
+
+  .head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:4px; }
+  .head h1{ margin:0; font-size:18px; letter-spacing:0.02em; }
+  .head .sub{ font-family:var(--mono); font-size:11px; color:var(--text-tertiary); letter-spacing:0.04em; text-transform:uppercase; }
+
+  .banner{
+    margin:12px 0 16px; padding:9px 12px; border-radius:10px;
+    background:rgba(185,139,255,0.08); border:1px solid rgba(185,139,255,0.25);
+    color:var(--text-secondary); font-size:11.5px; line-height:1.5;
+  }
+  .banner b{ color:var(--bot); }
+
+  .totalCard{
+    background:var(--panel); border:1px solid var(--border); border-radius:14px;
+    padding:16px; margin-bottom:14px;
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+  .totalCard .label{ font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:4px; }
+  .totalCard .value{ font-family:var(--mono); font-size:26px; font-weight:700; }
+  .totalCard .pnl{ font-family:var(--mono); font-size:13px; margin-top:2px; }
+  .up{ color:var(--up); } .down{ color:var(--down); } .flat{ color:var(--text-tertiary); }
+
+  .grid{ display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin-bottom:16px; }
+  @media (min-width:560px){ .grid{ grid-template-columns:repeat(3, 1fr); } }
+
+  .coin{
+    background:var(--panel); border:1px solid var(--border); border-radius:12px;
+    padding:12px; position:relative; overflow:hidden;
+  }
+  .coin .sym{ font-weight:700; font-size:13px; letter-spacing:0.02em; }
+  .coin .bal{ font-family:var(--mono); font-size:17px; margin-top:6px; }
+  .coin .pnl{ font-family:var(--mono); font-size:11px; margin-top:2px; }
+  .coin .pos{
+    margin-top:8px; padding-top:8px; border-top:1px solid var(--border);
+    font-family:var(--mono); font-size:10.5px; color:var(--text-secondary); line-height:1.6;
+  }
+  .coin .pos .dir{ font-weight:700; }
+  .coin .pos.long .dir{ color:var(--up); }
+  .coin .pos.short .dir{ color:var(--down); }
+  .coin .noPos{ margin-top:8px; padding-top:8px; border-top:1px solid var(--border); font-size:10.5px; color:var(--text-tertiary); }
+
+  h2{ font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-tertiary); margin:20px 0 8px; }
+
+  .trade{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:9px 12px; border-bottom:1px solid var(--border); font-size:12px;
+  }
+  .trade:last-child{ border-bottom:0; }
+  .trade .sym{ font-weight:700; width:64px; flex:0 0 auto; }
+  .trade .reason{ color:var(--text-secondary); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .trade .pnl{ font-family:var(--mono); font-weight:600; flex:0 0 auto; }
+  .tradesCard{ background:var(--panel); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+  .empty{ padding:16px 12px; color:var(--text-tertiary); font-size:12px; text-align:center; }
+
+  .footer{ margin-top:18px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .footer .hint{ font-size:10.5px; color:var(--text-tertiary); }
+  #refreshBtn{
+    background:var(--panel2); border:1px solid var(--border); color:var(--text-secondary);
+    font-family:var(--mono); font-size:10.5px; padding:6px 10px; border-radius:8px; cursor:pointer;
+  }
+  #refreshBtn:active{ opacity:0.7; }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <h1>UltimateTradingBot</h1>
+  <div class="sub">Paper trading · ATLAS + GoldenRatio + CRUCIBLE</div>
+</div>
+
+<div class="banner">
+  <b>Paper trading only</b> — no API keys, no exchange account, no real orders. Every number below is a simulated
+  balance the bot tracks against its own entry/SL/TP decisions, read straight from its GitHub Actions run state.
+</div>
+
+<div class="totalCard">
+  <div>
+    <div class="label">Total equity</div>
+    <div class="value" id="totalValue">—</div>
+    <div class="pnl flat" id="totalPnl">—</div>
+  </div>
+  <div style="text-align:right">
+    <div class="label">Started</div>
+    <div class="value" id="startedValue" style="font-size:15px; color:var(--text-secondary)">—</div>
+  </div>
+</div>
+
+<div class="grid" id="coinGrid"></div>
+
+<h2>Open positions</h2>
+<div class="tradesCard" id="openPositions"><div class="empty">Loading…</div></div>
+
+<h2>Recent trades</h2>
+<div class="tradesCard" id="tradeLog"><div class="empty">Loading…</div></div>
+
+<div class="footer">
+  <div class="hint" id="lastUpdated">—</div>
+  <button type="button" id="refreshBtn">Refresh</button>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var SYMBOLS = [
+    { id: 'BTCUSDT', label: 'BTC' },
+    { id: 'ETHUSDT', label: 'ETH' },
+    { id: 'SOLUSDT', label: 'SOL' },
+    { id: 'XRPUSDT', label: 'XRP' },
+    { id: 'BNBUSDT', label: 'BNB' },
+    { id: 'DOGEUSDT', label: 'DOGE' },
+  ];
+  var STARTING_BALANCE = 2000;
+  var RAW_BASE = 'https://raw.githubusercontent.com/alicetin1905-ux/UltimateTradingBot/main/state/';
+
+  var els = {
+    totalValue: document.getElementById('totalValue'),
+    totalPnl: document.getElementById('totalPnl'),
+    startedValue: document.getElementById('startedValue'),
+    coinGrid: document.getElementById('coinGrid'),
+    openPositions: document.getElementById('openPositions'),
+    tradeLog: document.getElementById('tradeLog'),
+    lastUpdated: document.getElementById('lastUpdated'),
+    refreshBtn: document.getElementById('refreshBtn'),
+  };
+
+  function fmtMoney(x) {
+    var n = Math.round(x * 100) / 100;
+    return (n < 0 ? '-$' : '$') + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function fmtSigned(x) {
+    var n = Math.round(x * 100) / 100;
+    return (n >= 0 ? '+' : '-') + '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function pnlClass(x) { return x > 0.005 ? 'up' : x < -0.005 ? 'down' : 'flat'; }
+  function fmtPrice(x) {
+    if (x == null) return '—';
+    var abs = Math.abs(x);
+    var dp = abs >= 1000 ? 1 : abs >= 100 ? 2 : abs >= 1 ? 3 : 5;
+    return (+x).toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+  }
+  function timeAgo(ts) {
+    if (!ts) return '—';
+    var s = Math.floor((Date.now() - ts) / 1000);
+    if (s < 60) return s + 's ago';
+    if (s < 3600) return Math.floor(s / 60) + 'm ago';
+    if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+    return Math.floor(s / 86400) + 'd ago';
+  }
+
+  async function fetchJson(name) {
+    var res = await fetch(RAW_BASE + name + '.json?_=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error(name + ' -> HTTP ' + res.status);
+    return res.json();
+  }
+
+  function renderCoins(equity, positions) {
+    els.coinGrid.innerHTML = SYMBOLS.map(function (s) {
+      var bal = equity[s.id];
+      if (bal == null) return '';
+      var pnl = bal - STARTING_BALANCE;
+      var pos = positions[s.id];
+      var posHtml = '<div class="noPos">no open position</div>';
+      if (pos) {
+        var dir = pos.bias === 1 ? 'long' : 'short';
+        posHtml =
+          '<div class="pos ' + dir + '">' +
+            '<span class="dir">' + dir.toUpperCase() + '</span> @ ' + fmtPrice(pos.entry) + '<br>' +
+            'SL ' + fmtPrice(pos.stop) + ' · T1 ' + fmtPrice(pos.t1) + (pos.filled && pos.filled.t1 ? ' ✓' : '') +
+            ' · T2 ' + fmtPrice(pos.t2) + (pos.filled && pos.filled.t2 ? ' ✓' : '') +
+            ' · T3 ' + fmtPrice(pos.t3) +
+          '</div>';
+      }
+      return (
+        '<div class="coin">' +
+          '<div class="sym">' + s.label + '</div>' +
+          '<div class="bal">' + fmtMoney(bal) + '</div>' +
+          '<div class="pnl ' + pnlClass(pnl) + '">' + fmtSigned(pnl) + '</div>' +
+          posHtml +
+        '</div>'
+      );
+    }).join('');
+  }
+
+  function renderOpenPositions(positions) {
+    var entries = SYMBOLS.map(function (s) { return positions[s.id] ? { s: s, pos: positions[s.id] } : null; }).filter(Boolean);
+    if (!entries.length) { els.openPositions.innerHTML = '<div class="empty">No open positions right now.</div>'; return; }
+    els.openPositions.innerHTML = entries.map(function (e) {
+      var dir = e.pos.bias === 1 ? 'long' : 'short';
+      var cls = e.pos.bias === 1 ? 'up' : 'down';
+      return (
+        '<div class="trade">' +
+          '<span class="sym">' + e.s.label + '</span>' +
+          '<span class="reason">' + dir.toUpperCase() + ' @ ' + fmtPrice(e.pos.entry) +
+            ' · SL ' + fmtPrice(e.pos.stop) + ' · risk ' + fmtMoney(e.pos.riskAmt) + '</span>' +
+          '<span class="pnl ' + cls + '">' + timeAgo(e.pos.openedAt) + '</span>' +
+        '</div>'
+      );
+    }).join('');
+  }
+
+  function renderTrades(trades) {
+    if (!trades.length) { els.tradeLog.innerHTML = '<div class="empty">No closed trades yet.</div>'; return; }
+    var recent = trades.slice(-25).reverse();
+    els.tradeLog.innerHTML = recent.map(function (t) {
+      var label = (SYMBOLS.find(function (s) { return s.id === t.symbol; }) || { label: t.symbol }).label;
+      return (
+        '<div class="trade">' +
+          '<span class="sym">' + label + '</span>' +
+          '<span class="reason">' + t.reason + '</span>' +
+          '<span class="pnl ' + pnlClass(t.pnl) + '">' + fmtSigned(t.pnl) + '</span>' +
+        '</div>'
+      );
+    }).join('');
+  }
+
+  async function refresh() {
+    els.refreshBtn.textContent = 'Loading…';
+    try {
+      var results = await Promise.all([fetchJson('equity'), fetchJson('positions'), fetchJson('trades')]);
+      var equity = results[0], positions = results[1], trades = results[2];
+
+      var total = 0, started = 0;
+      SYMBOLS.forEach(function (s) { if (equity[s.id] != null) { total += equity[s.id]; started += STARTING_BALANCE; } });
+      var pnl = total - started;
+
+      els.totalValue.textContent = fmtMoney(total);
+      els.totalPnl.textContent = fmtSigned(pnl) + ' (' + (pnl >= 0 ? '+' : '') + (started ? (pnl / started * 100).toFixed(2) : '0.00') + '%)';
+      els.totalPnl.className = 'pnl ' + pnlClass(pnl);
+      els.startedValue.textContent = fmtMoney(started);
+
+      renderCoins(equity, positions);
+      renderOpenPositions(positions);
+      renderTrades(trades);
+
+      els.lastUpdated.textContent = 'updated ' + new Date().toLocaleTimeString();
+    } catch (e) {
+      els.lastUpdated.textContent = 'fetch failed: ' + e.message;
+    } finally {
+      els.refreshBtn.textContent = 'Refresh';
+    }
+  }
+
+  els.refreshBtn.addEventListener('click', refresh);
+  refresh();
+  setInterval(refresh, 60000);
+})();
+</script>
+</body>
+</html>
