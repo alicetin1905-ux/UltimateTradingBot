@@ -34,6 +34,11 @@ function runSymbol({ symbol, data, state }) {
   const events = [];
   if (!analysis) { events.push({ symbol, type: 'skip', reason: 'not enough candle history yet' }); return events; }
 
+  // Recorded every run regardless of what happens below, so the dashboard
+  // can show how close each coin is to the entry threshold even while
+  // nothing is open and no trade fires.
+  state.scores[symbol] = { score: analysis.score, bias: analysis.bias, at: Date.now() };
+
   const openPos = state.positions[symbol];
 
   // 1) Manage an existing position: replay every candle that closed since

@@ -12,6 +12,7 @@ const FILES = {
   positions: 'positions.json',
   trades: 'trades.json',
   flipEntries: 'flipEntries.json',
+  scores: 'scores.json',
 };
 
 function readJson(name, fallback) {
@@ -32,7 +33,8 @@ function loadState(config) {
   const positions = readJson('positions', {}); // keyed by symbol -> position object or absent
   const trades = readJson('trades', []);        // append-only closed-trade log
   const flipEntries = readJson('flipEntries', {});
-  return { equity, positions, trades, flipEntries };
+  const scores = readJson('scores', {});         // keyed by symbol -> latest {score, bias, at}, every run
+  return { equity, positions, trades, flipEntries, scores };
 }
 
 function saveState(state) {
@@ -40,6 +42,7 @@ function saveState(state) {
   writeJson('positions', state.positions);
   writeJson('trades', state.trades);
   writeJson('flipEntries', state.flipEntries);
+  writeJson('scores', state.scores);
 }
 
 module.exports = { loadState, saveState, DIR };

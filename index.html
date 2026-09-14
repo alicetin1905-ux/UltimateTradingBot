@@ -68,6 +68,10 @@
   .coin .pos.long .dir{ color:var(--up); }
   .coin .pos.short .dir{ color:var(--down); }
   .coin .noPos{ margin-top:8px; padding-top:8px; border-top:1px solid var(--border); font-size:10.5px; color:var(--text-tertiary); }
+  .coin .proximity{ margin-top:8px; padding-top:8px; border-top:1px solid var(--border); }
+  .coin .proximityTrack{ height:5px; border-radius:3px; background:var(--panel2); overflow:hidden; }
+  .coin .proximityFill{ height:100%; background:var(--bot); border-radius:3px; }
+  .coin .proximityLabel{ margin-top:4px; font-family:var(--mono); font-size:9.5px; color:var(--text-tertiary); }
 
   h2{ font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-tertiary); margin:20px 0 8px; }
 
@@ -156,6 +160,7 @@
     { id: 'DOGEUSDT', label: 'DOGE' },
   ];
   var STARTING_BALANCE = 2000;
+  var SCORE_THRESHOLD = 25; // matches config.js SCORE_THRESHOLD — the |score| that triggers an entry
   var RAW_BASE = 'https://raw.githubusercontent.com/alicetin1905-ux/UltimateTradingBot/main/state/';
 
   var els = {
@@ -201,29 +206,42 @@
     return res.json();
   }
 
-  function renderCoins(equity, positions) {
+  function renderCoins(equity, positions, scores) {
     els.coinGrid.innerHTML = SYMBOLS.map(function (s) {
       var bal = equity[s.id];
       if (bal == null) return '';
       var pnl = bal - STARTING_BALANCE;
       var pos = positions[s.id];
-      var posHtml = '<div class="noPos">no open position</div>';
+      var extraHtml;
       if (pos) {
         var dir = pos.bias === 1 ? 'long' : 'short';
-        posHtml =
+        extraHtml =
           '<div class="pos ' + dir + '">' +
             '<span class="dir">' + dir.toUpperCase() + '</span> @ ' + fmtPrice(pos.entry) + '<br>' +
             'SL ' + fmtPrice(pos.stop) + ' · T1 ' + fmtPrice(pos.t1) + (pos.filled && pos.filled.t1 ? ' ✓' : '') +
             ' · T2 ' + fmtPrice(pos.t2) + (pos.filled && pos.filled.t2 ? ' ✓' : '') +
             ' · T3 ' + fmtPrice(pos.t3) +
           '</div>';
+      } else {
+        var sc = scores[s.id];
+        if (sc) {
+          var pct = Math.max(0, Math.min(100, Math.round((Math.abs(sc.score) / SCORE_THRESHOLD) * 100)));
+          var dirWord = sc.score > 0 ? 'long' : sc.score < 0 ? 'short' : '—';
+          extraHtml =
+            '<div class="proximity">' +
+              '<div class="proximityTrack"><div class="proximityFill" style="width:' + pct + '%"></div></div>' +
+              '<div class="proximityLabel">' + pct + '% to entry · score ' + (sc.score > 0 ? '+' : '') + sc.score + ' (' + dirWord + ')</div>' +
+            '</div>';
+        } else {
+          extraHtml = '<div class="noPos">no open position</div>';
+        }
       }
       return (
         '<div class="coin">' +
           '<div class="sym">' + s.label + '</div>' +
           '<div class="bal">' + fmtMoney(bal) + '</div>' +
           '<div class="pnl ' + pnlClass(pnl) + '">' + fmtSigned(pnl) + '</div>' +
-          posHtml +
+          extraHtml +
         '</div>'
       );
     }).join('');
@@ -333,8 +351,11 @@
   async function refresh() {
     els.refreshBtn.textContent = 'Loading…';
     try {
-      var results = await Promise.all([fetchJson('equity'), fetchJson('positions'), fetchJson('trades')]);
-      var equity = results[0], positions = results[1], trades = results[2];
+      var results = await Promise.all([
+        fetchJson('equity'), fetchJson('positions'), fetchJson('trades'),
+        fetchJson('scores').catch(function () { return {}; }),
+      ]);
+      var equity = results[0], positions = results[1], trades = results[2], scores = results[3];
 
       var total = 0, started = 0;
       SYMBOLS.forEach(function (s) { if (equity[s.id] != null) { total += equity[s.id]; started += STARTING_BALANCE; } });
@@ -345,7 +366,7 @@
       els.totalPnl.className = 'pnl ' + pnlClass(pnl);
       els.startedValue.textContent = fmtMoney(started);
 
-      renderCoins(equity, positions);
+      renderCoins(equity, positions, scores);
       renderOpenPositions(positions);
       renderTrades(trades);
       if (watch.on) checkNewEntries(positions);
