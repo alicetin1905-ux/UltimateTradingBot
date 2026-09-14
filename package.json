@@ -1,0 +1,14 @@
+{
+  "name": "ultimate-trading-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Paper-trading bot combining ATLAS's scoring engine, GoldenRatio's fib impulse confluence, and CRUCIBLE's liquidation-cluster model into one entry/SL/TP decision per coin.",
+  "main": "src/run.js",
+  "scripts": {
+    "start": "node src/run.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED"
+}
