@@ -89,6 +89,15 @@
     font-family:var(--mono); font-size:10.5px; padding:6px 10px; border-radius:8px; cursor:pointer;
   }
   #refreshBtn:active{ opacity:0.7; }
+
+  #alertsToggle{
+    background:var(--panel2); border:1px solid var(--border); color:var(--text-secondary);
+    font-family:var(--mono); font-size:10.5px; padding:6px 10px; border-radius:8px; cursor:pointer;
+    flex:0 0 auto;
+  }
+  #alertsToggle.on{ color:var(--bot); border-color:rgba(185,139,255,0.45); }
+  #alertsHint{ font-size:10.5px; line-height:1.5; color:var(--text-tertiary); margin:-6px 0 14px; }
+  #alertsHint:empty{ display:none; margin:0; }
 </style>
 </head>
 <body>
@@ -102,6 +111,12 @@
   <b>Paper trading only</b> — no API keys, no exchange account, no real orders. Every number below is a simulated
   balance the bot tracks against its own entry/SL/TP decisions, read straight from its GitHub Actions run state.
 </div>
+
+<div style="display:flex; align-items:center; gap:8px; margin:-6px 0 6px;">
+  <button type="button" id="alertsToggle">Alerts off</button>
+  <span style="font-size:10.5px; color:var(--text-tertiary);">Notify when the bot takes a new entry</span>
+</div>
+<div id="alertsHint"></div>
 
 <div class="totalCard">
   <div>
@@ -152,6 +167,8 @@
     tradeLog: document.getElementById('tradeLog'),
     lastUpdated: document.getElementById('lastUpdated'),
     refreshBtn: document.getElementById('refreshBtn'),
+    alertsToggle: document.getElementById('alertsToggle'),
+    alertsHint: document.getElementById('alertsHint'),
   };
 
   function fmtMoney(x) {
@@ -244,6 +261,75 @@
     }).join('');
   }
 
+  /* ---------------- alerts: notify when the bot takes a new entry ----------------
+     Diffs each poll's positions against the previous one — a symbol that has
+     no position now but does after this fetch, or whose position's openedAt
+     changed (the old one fully closed and a fresh one opened within one poll
+     gap), just had a new entry taken. The very first successful fetch only
+     primes this baseline — it never fires for positions that were already
+     open before the page loaded. */
+  var WATCH_KEY = 'ultimatetradingbot-watch-v1';
+  var watch = { on: false, sys: false };
+  var lastPositions = null;
+
+  function watchLoad() {
+    try {
+      var j = JSON.parse(localStorage.getItem(WATCH_KEY) || '{}');
+      if (typeof j.on === 'boolean') watch.on = j.on;
+    } catch (e) {}
+    watch.sys = typeof Notification !== 'undefined' && Notification.permission === 'granted';
+  }
+  function watchSave() {
+    try { localStorage.setItem(WATCH_KEY, JSON.stringify({ on: watch.on })); } catch (e) {}
+  }
+  function paintWatchUi() {
+    els.alertsToggle.classList.toggle('on', watch.on);
+    els.alertsToggle.textContent = watch.on ? 'Alerts on' : 'Alerts off';
+    if (!watch.on) { els.alertsHint.textContent = ''; return; }
+    var iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    var standalone = window.navigator.standalone === true ||
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+    if (!watch.sys) {
+      els.alertsHint.textContent = iOS && !standalone
+        ? 'No system notifications in a plain Safari tab — add this to the Home Screen and open it from there to get real alerts.'
+        : 'System notifications are blocked or not permitted in this browser.';
+    } else {
+      els.alertsHint.textContent = 'Watching for new entries — a notification fires the moment the bot opens one, checked every 60s.';
+    }
+  }
+  async function toggleWatch() {
+    if (watch.on) { watch.on = false; watchSave(); paintWatchUi(); return; }
+    watch.on = true;
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+      try { await Notification.requestPermission(); } catch (e) {}
+    }
+    watch.sys = typeof Notification !== 'undefined' && Notification.permission === 'granted';
+    watchSave();
+    paintWatchUi();
+  }
+  function fireEntryNotification(symbol, pos) {
+    if (!watch.sys) return;
+    var label = (SYMBOLS.find(function (s) { return s.id === symbol; }) || { label: symbol }).label;
+    var dir = pos.bias === 1 ? 'LONG' : 'SHORT';
+    var title = 'UltimateTradingBot — ' + label;
+    var body = dir + ' @ ' + fmtPrice(pos.entry) + ' · SL ' + fmtPrice(pos.stop) + ' · risk ' + fmtMoney(pos.riskAmt);
+    try {
+      var n = new Notification(title, { body: body, tag: 'bot-entry-' + symbol, renotify: false });
+      n.onclick = function () { try { window.focus(); } catch (e) {} n.close(); };
+    } catch (e) {}
+  }
+  function checkNewEntries(positions) {
+    if (lastPositions) {
+      SYMBOLS.forEach(function (s) {
+        var pos = positions[s.id];
+        if (!pos) return;
+        var prev = lastPositions[s.id];
+        if (!prev || prev.openedAt !== pos.openedAt) fireEntryNotification(s.id, pos);
+      });
+    }
+    lastPositions = positions;
+  }
+
   async function refresh() {
     els.refreshBtn.textContent = 'Loading…';
     try {
@@ -262,6 +348,8 @@
       renderCoins(equity, positions);
       renderOpenPositions(positions);
       renderTrades(trades);
+      if (watch.on) checkNewEntries(positions);
+      else lastPositions = positions;
 
       els.lastUpdated.textContent = 'updated ' + new Date().toLocaleTimeString();
     } catch (e) {
@@ -272,6 +360,9 @@
   }
 
   els.refreshBtn.addEventListener('click', refresh);
+  els.alertsToggle.addEventListener('click', toggleWatch);
+  watchLoad();
+  paintWatchUi();
   refresh();
   setInterval(refresh, 60000);
 })();
