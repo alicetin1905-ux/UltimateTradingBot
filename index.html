@@ -48,6 +48,8 @@
   .totalCard .label{ font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:4px; }
   .totalCard .value{ font-family:var(--mono); font-size:26px; font-weight:700; }
   .totalCard .pnl{ font-family:var(--mono); font-size:13px; margin-top:2px; }
+  .totalCard .breakdown{ font-family:var(--mono); font-size:10.5px; color:var(--text-tertiary); margin-top:5px; }
+  .totalCard .breakdown:empty{ display:none; }
   .up{ color:var(--up); } .down{ color:var(--down); } .flat{ color:var(--text-tertiary); }
 
   .grid{ display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin-bottom:16px; }
@@ -156,6 +158,7 @@
     <div class="label">Total equity</div>
     <div class="value" id="totalValue">—</div>
     <div class="pnl flat" id="totalPnl">—</div>
+    <div class="breakdown" id="totalBreakdown"></div>
   </div>
   <div style="text-align:right">
     <div class="label">Started</div>
@@ -195,6 +198,7 @@
   var els = {
     totalValue: document.getElementById('totalValue'),
     totalPnl: document.getElementById('totalPnl'),
+    totalBreakdown: document.getElementById('totalBreakdown'),
     startedValue: document.getElementById('startedValue'),
     coinGrid: document.getElementById('coinGrid'),
     openPositions: document.getElementById('openPositions'),
@@ -436,18 +440,32 @@
       ]);
       var equity = results[0], positions = results[1], trades = results[2], scores = results[3];
 
-      var total = 0, started = 0;
-      SYMBOLS.forEach(function (s) { if (equity[s.id] != null) { total += equity[s.id]; started += STARTING_BALANCE; } });
+      var openSymbols = Object.keys(positions);
+      var markPrices = openSymbols.length ? await fetchMarkPrices(openSymbols) : {};
+
+      var balance = 0, started = 0;
+      SYMBOLS.forEach(function (s) { if (equity[s.id] != null) { balance += equity[s.id]; started += STARTING_BALANCE; } });
+
+      var unrealized = 0, unrealizedKnown = 0;
+      openSymbols.forEach(function (symbol) {
+        var pos = positions[symbol], mark = markPrices[symbol];
+        if (mark == null) return;
+        unrealized += (mark - pos.entry) * pos.bias * pos.qtyRemaining;
+        unrealizedKnown++;
+      });
+
+      var total = balance + unrealized;
       var pnl = total - started;
 
       els.totalValue.textContent = fmtMoney(total);
       els.totalPnl.textContent = fmtSigned(pnl) + ' (' + (pnl >= 0 ? '+' : '') + (started ? (pnl / started * 100).toFixed(2) : '0.00') + '%)';
       els.totalPnl.className = 'pnl ' + pnlClass(pnl);
+      els.totalBreakdown.textContent = openSymbols.length
+        ? 'balance ' + fmtMoney(balance) + ' · unrealized ' + fmtSigned(unrealized) + (unrealizedKnown < openSymbols.length ? ' (' + (openSymbols.length - unrealizedKnown) + ' mark price unavailable)' : '')
+        : '';
       els.startedValue.textContent = fmtMoney(started);
 
       renderCoins(equity, positions, scores);
-      var openSymbols = Object.keys(positions);
-      var markPrices = openSymbols.length ? await fetchMarkPrices(openSymbols) : {};
       renderOpenPositions(positions, markPrices);
       renderTrades(trades);
       if (watch.on) checkNewEntries(positions);
