@@ -25,14 +25,22 @@ account into one entry/stop/take-profit decision per coin:
 
 ## This is paper trading only
 
-**No API keys, no exchange account, no real orders.** The bot reads Bybit's
-public market-data endpoints (the same unauthenticated ones the four
-dashboards already call from the browser), decides what it *would* do, and
+**No API keys, no exchange account, no real orders.** The bot reads Binance
+futures' public market-data endpoints, decides what it *would* do, and
 tracks the result in `state/*.json` against a simulated balance. Nothing in
 this repo can place, modify, or cancel a real order. Treat every number here
 as a research/backtest read on the strategy, not investment advice — past
 performance of a scoring heuristic on historical candles doesn't guarantee
 anything about future ones.
+
+The scoring/entry/exit logic itself was ported from ATLAS/GoldenRatio/
+CRUCIBLE, which read Bybit client-side in the user's own browser. This bot
+runs unattended on GitHub Actions instead, and Bybit's API blocks GitHub
+Actions' hosted runners outright (a CloudFront geo-block, confirmed against
+a real run's logs) — so it reads the same kind of data from Binance futures
+instead. Prices/funding/OI move together closely across major exchanges on
+these six coins, but they won't be bit-for-bit identical to what the other
+four dashboards show at any given instant.
 
 ## Rules
 
@@ -55,8 +63,8 @@ node src/run.js
 ```
 
 Requires Node 18+ (for native `fetch`). It reads `state/*.json`, fetches
-fresh Bybit data for all six coins, runs the strategy, prints a summary, and
-writes the updated state back to those same files.
+fresh Binance futures data for all six coins, runs the strategy, prints a
+summary, and writes the updated state back to those same files.
 
 ## Automation
 
@@ -75,7 +83,7 @@ src/atlasScore.js       ATLAS's analyse(): score, bias, flip-entry, SL/TP plan
 src/fib.js              GoldenRatio's impulse + fib retracement, as a confluence check
 src/liquidity.js        CRUCIBLE's liquidation-cluster model, for SL/TP refinement
 src/risk.js             position sizing (risk % of balance, capped by leverage)
-src/bybit.js            Bybit V5 public REST client (no API key)
+src/binance.js          Binance futures public REST client (no API key)
 src/strategy.js         combines all of the above into one decision per coin
 src/state.js            reads/writes state/*.json
 src/run.js              entry point — loops all six coins, prints the run summary

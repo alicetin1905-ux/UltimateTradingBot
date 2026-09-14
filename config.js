@@ -44,6 +44,4 @@ module.exports = {
   // of all-or-nothing, and move the stop to breakeven once T1 fills so a
   // full round-trip back to entry can't turn a winner into a loser.
   TARGET_SPLIT: [0.40, 0.35, 0.25], // T1 / T2 / T3 shares, must sum to 1
-
-  API_BASE: 'https://api.bybit.com',
 };

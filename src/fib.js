@@ -43,7 +43,7 @@ function fibLevels(imp) {
   return RATIOS.map(r => ({ ratio: r, price: imp.p0 + (imp.p1 - imp.p0) * r }));
 }
 
-// candles here are Bybit-shaped {t,o,h,l,c,v}; detectImpulse wants {h,l}.
+// candles here are {t,o,h,l,c,v}; detectImpulse wants {h,l}.
 function confluence({ candles1h, thresholdPct, windowN, bias, maxScan }) {
   const closed = candles1h.slice(0, -1).map(x => ({ h: x.h, l: x.l }));
   const imp = detectImpulse(closed, thresholdPct, windowN, maxScan || 300);

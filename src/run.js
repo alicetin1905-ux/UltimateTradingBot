@@ -6,7 +6,7 @@
 'use strict';
 
 const config = require('../config');
-const bybit = require('./bybit');
+const marketData = require('./binance');
 const strategy = require('./strategy');
 const state = require('./state');
 
@@ -16,7 +16,7 @@ async function main() {
 
   for (const symbol of config.SYMBOLS) {
     try {
-      const data = await bybit.loadSymbolData(symbol, config.MTF_TFS, config.ENTRY_TF);
+      const data = await marketData.loadSymbolData(symbol, config.MTF_TFS, config.ENTRY_TF);
       const events = strategy.runSymbol({ symbol, data, state: st });
       allEvents.push(...events);
     } catch (err) {

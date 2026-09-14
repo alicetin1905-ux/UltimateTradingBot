@@ -3,9 +3,9 @@
 // atlasScore.js's trade plan and re-checked by strategy.js on every trade.
 'use strict';
 
-// Bybit doesn't publish qty step / min order qty without an authenticated
-// instruments-info call; a conservative generic step keeps paper sizing
-// sane across the six coins without needing exchange credentials.
+// Exchange lot-size rules need an authenticated instruments-info call to
+// fetch live; a conservative generic step keeps paper sizing sane across
+// the six coins without needing exchange credentials.
 const QTY_STEP = { BTCUSDT: 0.001, ETHUSDT: 0.01, SOLUSDT: 0.1, XRPUSDT: 1, BNBUSDT: 0.01, DOGEUSDT: 1 };
 
 function sizeFor({ symbol, equity, bias, entry, stop, riskPct, leverage, mmr = 0.005 }) {
