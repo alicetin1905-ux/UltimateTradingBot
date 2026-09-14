@@ -86,6 +86,35 @@
   .tradesCard{ background:var(--panel); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
   .empty{ padding:16px 12px; color:var(--text-tertiary); font-size:12px; text-align:center; }
 
+  .posGrid{ display:grid; grid-template-columns:1fr; gap:10px; }
+  @media (min-width:560px){ .posGrid{ grid-template-columns:repeat(2, 1fr); } }
+  .posCard{ background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px; }
+  .posCard .posHead{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .posCard .posSymWrap{ display:flex; align-items:center; gap:7px; }
+  .posCard .posSym{ font-weight:700; font-size:14px; }
+  .posBadge{
+    font-family:var(--mono); font-size:9.5px; font-weight:700; letter-spacing:0.07em;
+    padding:2px 7px; border-radius:5px;
+  }
+  .posBadge.long{ color:var(--up); background:rgba(53,255,176,0.12); }
+  .posBadge.short{ color:var(--down); background:rgba(255,77,106,0.12); }
+  .posCard .posAge{ font-family:var(--mono); font-size:10px; color:var(--text-tertiary); }
+  .posCard .markRow{ margin-top:11px; display:flex; align-items:baseline; gap:9px; flex-wrap:wrap; }
+  .posCard .markPrice{ font-family:var(--mono); font-size:19px; font-weight:700; }
+  .posCard .markPnl{ font-family:var(--mono); font-size:12px; font-weight:600; }
+  .posCard .entryNote{ font-family:var(--mono); font-size:10px; color:var(--text-tertiary); margin-top:3px; }
+  .posStats{
+    margin-top:11px; padding-top:11px; border-top:1px solid var(--border);
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:9px 6px;
+  }
+  .posStats .k{ font-size:9px; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-tertiary); }
+  .posStats .v{ font-family:var(--mono); font-size:11.5px; margin-top:2px; }
+  .posStats .stat.hit .v{ color:var(--bot); }
+  .posCard .posFoot{
+    margin-top:9px; padding-top:9px; border-top:1px solid var(--border);
+    font-family:var(--mono); font-size:10px; color:var(--text-tertiary); display:flex; justify-content:space-between; gap:8px;
+  }
+
   .footer{ margin-top:18px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
   .footer .hint{ font-size:10.5px; color:var(--text-tertiary); }
   #refreshBtn{
@@ -137,7 +166,7 @@
 <div class="grid" id="coinGrid"></div>
 
 <h2>Open positions</h2>
-<div class="tradesCard" id="openPositions"><div class="empty">Loading…</div></div>
+<div id="openPositions"><div class="tradesCard"><div class="empty">Loading…</div></div></div>
 
 <h2>Recent trades</h2>
 <div class="tradesCard" id="tradeLog"><div class="empty">Loading…</div></div>
@@ -247,21 +276,71 @@
     }).join('');
   }
 
-  function renderOpenPositions(positions) {
+  var OKX_BASE = 'https://www.okx.com';
+  function okxInstId(symbol) { return symbol.replace('USDT', '') + '-USDT-SWAP'; }
+
+  // Live mark price per open symbol, straight from OKX (client-side — same
+  // public endpoint the bot itself reads server-side). Failures per symbol
+  // just leave that card showing entry-only; never blocks the rest of the page.
+  async function fetchMarkPrices(symbols) {
+    var out = {};
+    await Promise.all(symbols.map(async function (symbol) {
+      try {
+        var res = await fetch(OKX_BASE + '/api/v5/public/mark-price?instType=SWAP&instId=' + okxInstId(symbol), { cache: 'no-store' });
+        var d = await res.json();
+        if (d.code === '0' && d.data && d.data[0]) out[symbol] = +d.data[0].markPx;
+      } catch (e) { /* leave this symbol out — card falls back to entry-only */ }
+    }));
+    return out;
+  }
+
+  function renderOpenPositions(positions, markPrices) {
     var entries = SYMBOLS.map(function (s) { return positions[s.id] ? { s: s, pos: positions[s.id] } : null; }).filter(Boolean);
-    if (!entries.length) { els.openPositions.innerHTML = '<div class="empty">No open positions right now.</div>'; return; }
-    els.openPositions.innerHTML = entries.map(function (e) {
-      var dir = e.pos.bias === 1 ? 'long' : 'short';
-      var cls = e.pos.bias === 1 ? 'up' : 'down';
+    if (!entries.length) { els.openPositions.innerHTML = '<div class="tradesCard"><div class="empty">No open positions right now.</div></div>'; return; }
+
+    els.openPositions.innerHTML = '<div class="posGrid">' + entries.map(function (e) {
+      var pos = e.pos;
+      var dir = pos.bias === 1 ? 'long' : 'short';
+      var mark = markPrices[pos.symbol];
+
+      var markHtml;
+      if (mark != null) {
+        var pnl = (mark - pos.entry) * pos.bias * pos.qtyRemaining;
+        var pnlPct = pos.margin ? (pnl / pos.margin) * 100 : 0;
+        var moveCls = pos.bias === 1 ? (mark >= pos.entry ? 'up' : 'down') : (mark <= pos.entry ? 'up' : 'down');
+        markHtml =
+          '<div class="markRow">' +
+            '<span class="markPrice">' + fmtPrice(mark) + '</span>' +
+            '<span class="markPnl ' + pnlClass(pnl) + '">' + fmtSigned(pnl) + ' (' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(1) + '%)</span>' +
+          '</div>' +
+          '<div class="entryNote">entry ' + fmtPrice(pos.entry) + ' · <span class="' + moveCls + '">' + (mark >= pos.entry ? '+' : '') + (((mark - pos.entry) / pos.entry) * 100).toFixed(2) + '%</span> from entry</div>';
+      } else {
+        markHtml = '<div class="markRow"><span class="markPrice">' + fmtPrice(pos.entry) + '</span></div><div class="entryNote">mark price unavailable — showing entry</div>';
+      }
+
+      var stat = function (label, value, hit) {
+        return '<div class="stat' + (hit ? ' hit' : '') + '"><div class="k">' + label + '</div><div class="v">' + value + '</div></div>';
+      };
+
       return (
-        '<div class="trade">' +
-          '<span class="sym">' + e.s.label + '</span>' +
-          '<span class="reason">' + dir.toUpperCase() + ' @ ' + fmtPrice(e.pos.entry) +
-            ' · SL ' + fmtPrice(e.pos.stop) + ' · risk ' + fmtMoney(e.pos.riskAmt) + '</span>' +
-          '<span class="pnl ' + cls + '">' + timeAgo(e.pos.openedAt) + '</span>' +
+        '<div class="posCard">' +
+          '<div class="posHead">' +
+            '<div class="posSymWrap"><span class="posSym">' + e.s.label + '</span><span class="posBadge ' + dir + '">' + dir.toUpperCase() + '</span></div>' +
+            '<span class="posAge">' + timeAgo(pos.openedAt) + '</span>' +
+          '</div>' +
+          markHtml +
+          '<div class="posStats">' +
+            stat('Stop', fmtPrice(pos.stop)) +
+            stat('T1', fmtPrice(pos.t1), pos.filled && pos.filled.t1) +
+            stat('T2', fmtPrice(pos.t2), pos.filled && pos.filled.t2) +
+            stat('T3', fmtPrice(pos.t3), pos.filled && pos.filled.t3) +
+            stat('Risk', fmtMoney(pos.riskAmt)) +
+            stat('Margin', fmtMoney(pos.margin)) +
+          '</div>' +
+          '<div class="posFoot"><span>score ' + (pos.score > 0 ? '+' : '') + pos.score + '</span><span>' + pos.qtyRemaining + ' ' + e.s.label + '</span></div>' +
         '</div>'
       );
-    }).join('');
+    }).join('') + '</div>';
   }
 
   function renderTrades(trades) {
@@ -367,7 +446,9 @@
       els.startedValue.textContent = fmtMoney(started);
 
       renderCoins(equity, positions, scores);
-      renderOpenPositions(positions);
+      var openSymbols = Object.keys(positions);
+      var markPrices = openSymbols.length ? await fetchMarkPrices(openSymbols) : {};
+      renderOpenPositions(positions, markPrices);
       renderTrades(trades);
       if (watch.on) checkNewEntries(positions);
       else lastPositions = positions;
