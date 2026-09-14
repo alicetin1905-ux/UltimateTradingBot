@@ -13,7 +13,14 @@ const INTERVAL = { '30': '30m', '60': '1h', '240': '4h', 'D': '1d' };
 async function api(path) {
   const r = await fetch(BASE + path);
   const d = await r.json();
-  if (d.code && d.code < 0) throw new Error(`${path} -> ${d.msg || 'Binance API error'}`);
+  // A real klines/depth/etc response is always an array or a plain data
+  // object with no "msg" field; an error response (including the region
+  // block below) always carries one, regardless of what "code" holds —
+  // some of Binance's own block responses use code:0, which `code < 0`
+  // alone would miss entirely.
+  if (d && typeof d === 'object' && !Array.isArray(d) && typeof d.msg === 'string') {
+    throw new Error(`${path} -> ${d.msg}`);
+  }
   return d;
 }
 
