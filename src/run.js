@@ -6,7 +6,7 @@
 'use strict';
 
 const config = require('../config');
-const marketData = require('./binance');
+const marketData = require('./okx');
 const strategy = require('./strategy');
 const state = require('./state');
 
