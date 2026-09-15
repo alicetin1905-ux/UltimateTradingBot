@@ -130,5 +130,16 @@
     "openedAt": 1789441200000,
     "closedAt": 1789473600000,
     "score": -29
+  },
+  {
+    "symbol": "ETHUSDT",
+    "bias": -1,
+    "entry": 2497.72,
+    "exit": 2452.34,
+    "pnl": 363.03999999999724,
+    "reason": "manual close",
+    "openedAt": 1789441200000,
+    "closedAt": 1789479915129,
+    "score": -25
   }
 ]
