@@ -1,35 +1,4 @@
 {
-  "ETHUSDT": {
-    "symbol": "ETHUSDT",
-    "bias": -1,
-    "entry": 2497.72,
-    "stop": 2534.567891220774,
-    "initialStop": 2534.567891220774,
-    "t1": 2460.8721087792255,
-    "t2": 2424.0242175584513,
-    "t3": 2387.176326337677,
-    "qtyTotal": 8,
-    "qtyRemaining": 8,
-    "qtyT1": 3.2,
-    "qtyT2": 2.8,
-    "qtyT3": 2,
-    "margin": 1998.176,
-    "notional": 19981.76,
-    "riskAmt": 294.7831297661942,
-    "filled": {
-      "t1": false,
-      "t2": false,
-      "t3": false
-    },
-    "breakeven": false,
-    "openedAt": 1789441200000,
-    "score": -25,
-    "fibImpulse": "down",
-    "liqClusterNote": {
-      "stopNear": 2547.64323275,
-      "targetNear": 2419.71011975
-    }
-  },
   "DOGEUSDT": {
     "symbol": "DOGEUSDT",
     "bias": -1,
