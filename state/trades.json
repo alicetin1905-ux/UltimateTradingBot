@@ -9,5 +9,60 @@
     "openedAt": 1789416000000,
     "closedAt": 1789423200000,
     "score": 52
+  },
+  {
+    "symbol": "BTCUSDT",
+    "bias": 1,
+    "entry": 79067.4,
+    "exit": 78136.51972512376,
+    "pnl": -234.58182926881227,
+    "reason": "stop hit",
+    "openedAt": 1789416000000,
+    "closedAt": 1789441200000,
+    "score": 57
+  },
+  {
+    "symbol": "ETHUSDT",
+    "bias": 1,
+    "entry": 2569.95,
+    "exit": 2504.1633837397503,
+    "pnl": -499.97828357789626,
+    "reason": "stop hit",
+    "openedAt": 1789416000000,
+    "closedAt": 1789441200000,
+    "score": 74
+  },
+  {
+    "symbol": "SOLUSDT",
+    "bias": 1,
+    "entry": 103.95,
+    "exit": 101.8665950644294,
+    "pnl": -400.84710960378317,
+    "reason": "stop hit",
+    "openedAt": 1789416000000,
+    "closedAt": 1789441200000,
+    "score": 68
+  },
+  {
+    "symbol": "XRPUSDT",
+    "bias": 1,
+    "entry": 1.4631,
+    "exit": 1.4247391195168435,
+    "pnl": -499.99571621746253,
+    "reason": "stop hit",
+    "openedAt": 1789416000000,
+    "closedAt": 1789441200000,
+    "score": 81
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "bias": 1,
+    "entry": 0.08512,
+    "exit": 0.08366665671000724,
+    "pnl": -341.4804461032793,
+    "reason": "stop hit",
+    "openedAt": 1789416000000,
+    "closedAt": 1789441200000,
+    "score": 51
   }
 ]
