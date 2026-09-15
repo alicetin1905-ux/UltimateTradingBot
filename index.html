@@ -52,6 +52,13 @@
   .totalCard .breakdown:empty{ display:none; }
   .up{ color:var(--up); } .down{ color:var(--down); } .flat{ color:var(--text-tertiary); }
 
+  .resetAccountBtn{
+    display:inline-block; margin-top:7px; padding:5px 10px; border-radius:7px;
+    background:var(--panel2); border:1px solid var(--border); color:var(--text-secondary);
+    font-family:var(--mono); font-size:10px; text-decoration:none; letter-spacing:0.03em;
+  }
+  .resetAccountBtn:active{ opacity:0.7; }
+
   .grid{ display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin-bottom:16px; }
   @media (min-width:560px){ .grid{ grid-template-columns:repeat(3, 1fr); } }
 
@@ -182,6 +189,7 @@
   <div style="text-align:right">
     <div class="label">Started</div>
     <div class="value" id="startedValue" style="font-size:15px; color:var(--text-secondary)">—</div>
+    <a class="resetAccountBtn" href="https://github.com/alicetin1905-ux/UltimateTradingBot/actions/workflows/reset.yml" target="_blank" rel="noopener" title="Opens GitHub — click &quot;Run workflow&quot; there to confirm">Reset account</a>
   </div>
 </div>
 

@@ -76,10 +76,14 @@ back to this repo — GitHub Actions runners are ephemeral, so that commit is
 how the bot remembers open positions and balances between runs. No secrets
 or credentials are needed for any of this.
 
-`index.html` is a read-only dashboard — the bot's own hourly GitHub
-Actions run is the only thing that writes `state/*.json`. There's no
-manual reset or close from the page; if you want to zero out a coin's
-balance or clear a position, edit `state/*.json` directly and commit.
+`index.html` is otherwise a read-only dashboard — the bot's own hourly
+GitHub Actions run is the only thing that normally writes `state/*.json`.
+The one exception is the **Reset account** link (next to Total equity),
+which opens `.github/workflows/reset.yml` in the Actions tab; click "Run
+workflow" there to put every coin back to its starting $2,000 balance and
+drop any open positions (without recording them as trades — trade history
+is left alone). It's a second workflow, not a token in the browser: no
+credentials to create, store, or revoke, same as `bot.yml`.
 
 ## Layout
 
@@ -94,6 +98,7 @@ src/okx.js              OKX public REST client (no API key)
 src/strategy.js         combines all of the above into one decision per coin
 src/state.js            reads/writes state/*.json
 src/run.js              entry point — loops all six coins, prints the run summary
+src/reset.js            resets every coin's balance, drops all positions
 state/                  equity, open positions, closed-trade log, flip-entry memory
 ```
 
