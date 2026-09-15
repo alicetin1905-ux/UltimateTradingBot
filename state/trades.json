@@ -251,5 +251,82 @@
     "openedAt": 1789477200000,
     "closedAt": 1789491600000,
     "score": -50
+  },
+  {
+    "symbol": "BTCUSDT",
+    "bias": -1,
+    "entry": 76580,
+    "exit": 75797.08962289694,
+    "pnl": 81.7358433695599,
+    "reason": "T1 hit, stop moved to breakeven",
+    "openedAt": 1789491600000,
+    "closedAt": 1789506000000,
+    "score": -47
+  },
+  {
+    "symbol": "BTCUSDT",
+    "bias": -1,
+    "entry": 76580,
+    "exit": 75014.17924579387,
+    "pnl": 143.03772589672982,
+    "reason": "T2 hit",
+    "openedAt": 1789491600000,
+    "closedAt": 1789506000000,
+    "score": -47
+  },
+  {
+    "symbol": "ETHUSDT",
+    "bias": -1,
+    "entry": 2452.78,
+    "exit": 2452.78,
+    "pnl": 0,
+    "reason": "breakeven stop hit",
+    "openedAt": 1789477200000,
+    "closedAt": 1789506000000,
+    "score": -66
+  },
+  {
+    "symbol": "SOLUSDT",
+    "bias": -1,
+    "entry": 100.52,
+    "exit": 99.04496588017908,
+    "pnl": 117.35371457295227,
+    "reason": "T1 hit, stop moved to breakeven",
+    "openedAt": 1789491600000,
+    "closedAt": 1789506000000,
+    "score": -54
+  },
+  {
+    "symbol": "SOLUSDT",
+    "bias": -1,
+    "entry": 100.52,
+    "exit": 100.28587185925001,
+    "pnl": 16.2988305183104,
+    "reason": "T2 hit",
+    "openedAt": 1789491600000,
+    "closedAt": 1789506000000,
+    "score": -54
+  },
+  {
+    "symbol": "SOLUSDT",
+    "bias": -1,
+    "entry": 100.52,
+    "exit": 96.09489764053724,
+    "pnl": 220.03821482428552,
+    "reason": "T3 hit, position closed",
+    "openedAt": 1789491600000,
+    "closedAt": 1789506000000,
+    "score": -54
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "bias": -1,
+    "entry": 0.08279,
+    "exit": 0.08279,
+    "pnl": 0,
+    "reason": "breakeven stop hit",
+    "openedAt": 1789477200000,
+    "closedAt": 1789506000000,
+    "score": -50
   }
 ]

@@ -16,7 +16,11 @@
     "price": 0.08279
   },
   "BNBUSDT:60": {
-    "bias": 1,
-    "price": 722.8
+    "bias": -1,
+    "price": 710.7
+  },
+  "XRPUSDT:60": {
+    "bias": -1,
+    "price": 1.2773
   }
 }
