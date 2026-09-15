@@ -107,50 +107,6 @@
   .chartTip .t1{ color:var(--text-tertiary); }
   .chartTip .t2{ font-weight:700; margin-top:1px; }
 
-  .ghRow{
-    display:flex; align-items:center; justify-content:space-between; gap:8px;
-    margin:-6px 0 12px; padding:8px 12px;
-    background:var(--panel2); border:1px solid var(--border); border-radius:9px; font-size:10.5px;
-  }
-  .ghRow .ghStatus{ color:var(--text-tertiary); }
-  .ghRow .ghStatus.on{ color:var(--up); }
-  .ghRow button{
-    background:var(--panel); border:1px solid var(--border); color:var(--text-secondary);
-    font-family:var(--mono); font-size:10px; padding:5px 9px; border-radius:7px; cursor:pointer;
-  }
-  .ghPanel{ margin:-6px 0 12px; padding:12px; background:var(--panel2); border:1px solid var(--border); border-radius:9px; }
-  .ghPanel p{ margin:0 0 8px; font-size:10.5px; line-height:1.6; color:var(--text-secondary); }
-  .ghPanel a{ color:var(--bot); }
-  .ghPanel code{ font-family:var(--mono); background:var(--panel); padding:1px 4px; border-radius:3px; }
-  .ghPanel input{
-    width:100%; box-sizing:border-box; background:var(--panel); border:1px solid var(--border);
-    color:var(--text-primary); font-family:var(--mono); font-size:11px; padding:8px 10px;
-    border-radius:7px; margin-bottom:8px;
-  }
-  .ghPanelBtns{ display:flex; gap:8px; }
-  .ghPanelBtns button{
-    background:var(--bot); border:0; color:#1a0f2e; font-weight:700;
-    font-family:var(--mono); font-size:10.5px; padding:7px 12px; border-radius:7px; cursor:pointer;
-  }
-  .ghPanelBtns button#ghCancelBtn{ background:var(--panel); color:var(--text-secondary); border:1px solid var(--border); }
-  .ghError{ margin-top:8px; font-size:10.5px; color:var(--down); }
-  .ghError:empty{ display:none; }
-
-  .coin .resetBtn{
-    position:absolute; top:12px; right:12px; background:none; border:0; padding:2px;
-    color:var(--text-tertiary); font-family:var(--mono); font-size:9px; cursor:pointer;
-    letter-spacing:0.05em; text-transform:uppercase;
-  }
-  .coin .resetBtn:disabled{ opacity:0.35; cursor:default; }
-
-  .posCard .closeBtn{
-    margin-top:9px; width:100%; padding:8px; background:var(--panel2); border:1px solid var(--border);
-    color:var(--text-secondary); font-family:var(--mono); font-size:10.5px; font-weight:700;
-    letter-spacing:0.04em; border-radius:8px; cursor:pointer;
-  }
-  .posCard .closeBtn:disabled{ opacity:0.4; cursor:default; }
-  .posCard .closeBtn:not(:disabled):active{ opacity:0.7; }
-
   .posGrid{ display:grid; grid-template-columns:1fr; gap:10px; }
   @media (min-width:560px){ .posGrid{ grid-template-columns:repeat(2, 1fr); } }
   .posCard{ background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px; }
@@ -216,26 +172,6 @@
 </div>
 <div id="alertsHint"></div>
 
-<div class="ghRow" id="ghRow">
-  <span class="ghStatus" id="ghStatus">GitHub write access: not connected</span>
-  <button type="button" id="ghConnectBtn">Connect</button>
-</div>
-<div class="ghPanel" id="ghPanel" hidden>
-  <p>
-    Create a <b>fine-grained personal access token</b> at
-    <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a>
-    scoped to <b>only the UltimateTradingBot repository</b>, with <b>Contents: Read and write</b> permission and nothing
-    else. It's saved only in this browser's local storage and used only to call GitHub's API directly from this page —
-    it never goes anywhere else. This is what enables the reset/close buttons below.
-  </p>
-  <input type="password" id="ghTokenInput" placeholder="github_pat_...">
-  <div class="ghPanelBtns">
-    <button type="button" id="ghSaveBtn">Save</button>
-    <button type="button" id="ghCancelBtn">Cancel</button>
-  </div>
-  <div class="ghError" id="ghError"></div>
-</div>
-
 <div class="totalCard">
   <div>
     <div class="label">Total equity</div>
@@ -281,8 +217,6 @@
   var SCORE_THRESHOLD = 25; // matches config.js SCORE_THRESHOLD — the |score| that triggers an entry
   var ENTRY_TF = '60';      // matches config.js ENTRY_TF — how flipEntries.json keys are built ("SYMBOL:60")
   var RAW_BASE = 'https://raw.githubusercontent.com/alicetin1905-ux/UltimateTradingBot/main/state/';
-  var GH_OWNER = 'alicetin1905-ux', GH_REPO = 'UltimateTradingBot', GH_BRANCH = 'main';
-  var GH_TOKEN_KEY = 'utb-gh-token';
 
   var els = {
     totalValue: document.getElementById('totalValue'),
@@ -297,14 +231,6 @@
     refreshBtn: document.getElementById('refreshBtn'),
     alertsToggle: document.getElementById('alertsToggle'),
     alertsHint: document.getElementById('alertsHint'),
-    ghRow: document.getElementById('ghRow'),
-    ghStatus: document.getElementById('ghStatus'),
-    ghConnectBtn: document.getElementById('ghConnectBtn'),
-    ghPanel: document.getElementById('ghPanel'),
-    ghTokenInput: document.getElementById('ghTokenInput'),
-    ghSaveBtn: document.getElementById('ghSaveBtn'),
-    ghCancelBtn: document.getElementById('ghCancelBtn'),
-    ghError: document.getElementById('ghError'),
   };
 
   function fmtMoney(x) {
@@ -336,169 +262,6 @@
     if (!res.ok) throw new Error(name + ' -> HTTP ' + res.status);
     return res.json();
   }
-
-  /* ---------------- GitHub write access: reset a coin / manually close a
-     position ----------------
-     The page is otherwise read-only — the bot's own GitHub Actions run is
-     the only thing that normally writes state/*.json. These two actions
-     need a real write path, so they use a personal access token the user
-     supplies themselves (stored only in this browser's localStorage, used
-     only for direct calls to api.github.com).
-
-     Writes go through the Contents API (GET for the current sha, PUT to
-     update), one commit per file — NOT the lower-level Git Data API
-     (blobs/trees/commits/refs), which fine-grained PATs can't call at all
-     ("Resource not accessible by personal access token", confirmed against
-     a real token with Contents: Read and write). That means these several
-     files don't land as one atomic commit, but each individual PUT is still
-     guarded the same way: it's rejected if the file's sha has moved since
-     the GET (something else, i.e. the bot, committed in between), rather
-     than silently overwriting whatever that other commit changed there. */
-  function ghToken() {
-    try { return localStorage.getItem(GH_TOKEN_KEY) || ''; } catch (e) { return ''; }
-  }
-  function ghSetToken(t) {
-    try { if (t) localStorage.setItem(GH_TOKEN_KEY, t); else localStorage.removeItem(GH_TOKEN_KEY); } catch (e) {}
-  }
-  function paintGhUi() {
-    var connected = !!ghToken();
-    els.ghStatus.textContent = 'GitHub write access: ' + (connected ? 'connected' : 'not connected');
-    els.ghStatus.className = 'ghStatus' + (connected ? ' on' : '');
-    els.ghConnectBtn.textContent = connected ? 'Disconnect' : 'Connect';
-  }
-
-  async function ghApi(path, opts) {
-    var headers = { Authorization: 'Bearer ' + ghToken(), Accept: 'application/vnd.github+json' };
-    if (opts && opts.body) headers['Content-Type'] = 'application/json';
-    var res = await fetch('https://api.github.com' + path, Object.assign({ headers: headers }, opts || {}));
-    var data = await res.json().catch(function () { return null; });
-    if (res.status === 401) {
-      // Token was valid when connected but has since been revoked/regenerated/
-      // expired — drop it now so the UI stops claiming "connected" and the
-      // next attempt gets a clear prompt to reconnect instead of a bare
-      // "Bad credentials".
-      ghSetToken('');
-      paintGhUi();
-      throw new Error('Your GitHub token is no longer valid (revoked, regenerated, or expired) — click Connect and paste in a current one.');
-    }
-    if (!res.ok) throw new Error((data && data.message) || ('GitHub API error ' + res.status));
-    return data;
-  }
-
-  // UTF-8-safe base64 encode — plain btoa() only handles Latin1 and throws
-  // on anything outside it.
-  function utf8ToBase64(str) {
-    return btoa(unescape(encodeURIComponent(str)));
-  }
-
-  // files: { 'equity.json': {...}, 'positions.json': {...}, ... } — full new
-  // content for each changed state/ file. One Contents-API PUT per file
-  // (sequential, each its own commit) — see the note above on why this
-  // isn't a single atomic multi-file commit.
-  async function ghCommitFiles(files, message) {
-    var written = [];
-    for (var name of Object.keys(files)) {
-      var path = '/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/state/' + name;
-      var current = await ghApi(path + '?ref=' + GH_BRANCH);
-      var content = JSON.stringify(files[name], null, 2) + '\n';
-      await ghApi(path, {
-        method: 'PUT',
-        body: JSON.stringify({ message: message, content: utf8ToBase64(content), sha: current.sha, branch: GH_BRANCH }),
-      });
-      written.push(name);
-    }
-    return written;
-  }
-
-  async function resetCoin(symbolId, label, btn) {
-    if (!ghToken()) return;
-    if (!confirm('Reset ' + label + ' back to $' + STARTING_BALANCE.toLocaleString('en-US') + '?\n\nThis closes any open ' + label + ' position without recording a trade, and clears its history. Cannot be undone.')) return;
-    var prevText = btn ? btn.textContent : null;
-    if (btn) { btn.disabled = true; btn.textContent = 'Resetting…'; }
-    try {
-      var fresh = await Promise.all([fetchJson('equity'), fetchJson('positions'), fetchJson('flipEntries'), fetchJson('scores')]);
-      var equity = fresh[0], positions = fresh[1], flipEntries = fresh[2], scores = fresh[3];
-      equity[symbolId] = STARTING_BALANCE;
-      delete positions[symbolId];
-      delete flipEntries[symbolId + ':' + ENTRY_TF];
-      delete scores[symbolId];
-      await ghCommitFiles(
-        { 'equity.json': equity, 'positions.json': positions, 'flipEntries.json': flipEntries, 'scores.json': scores },
-        'Reset ' + label + ' via dashboard'
-      );
-      await refresh();
-    } catch (e) {
-      alert('Reset failed: ' + e.message + '\n\nSomething may have changed the repo at the same moment (e.g. the bot\'s hourly run) — try again.');
-      if (btn) { btn.disabled = false; btn.textContent = prevText; }
-    }
-  }
-
-  async function closePosition(symbolId, label, markPrice, btn) {
-    if (!ghToken()) return;
-    if (markPrice == null) { alert('No live mark price for ' + label + ' yet — try again in a moment.'); return; }
-    try {
-      var fresh = await Promise.all([fetchJson('equity'), fetchJson('positions'), fetchJson('trades'), fetchJson('flipEntries')]);
-      var equity = fresh[0], positions = fresh[1], trades = fresh[2], flipEntries = fresh[3];
-      var pos = positions[symbolId];
-      if (!pos) { alert(label + '’s position is already closed (probably by the bot itself just now).'); await refresh(); return; }
-      var pnl = (markPrice - pos.entry) * pos.bias * pos.qtyRemaining;
-      if (!confirm('Close ' + label + ' ' + (pos.bias === 1 ? 'LONG' : 'SHORT') + ' @ ' + fmtPrice(markPrice) + ' now?\n\nRealized P&L: ' + fmtSigned(pnl) + '\n\nThe bot may open a new position here again on its next run if the signal is still active.')) return;
-      var prevText = btn ? btn.textContent : null;
-      if (btn) { btn.disabled = true; btn.textContent = 'Closing…'; }
-      equity[symbolId] += pnl;
-      delete positions[symbolId];
-      delete flipEntries[symbolId + ':' + ENTRY_TF];
-      trades.push({
-        symbol: symbolId, bias: pos.bias, entry: pos.entry, exit: markPrice, pnl: pnl,
-        reason: 'manual close', openedAt: pos.openedAt, closedAt: Date.now(), score: pos.score,
-      });
-      await ghCommitFiles(
-        { 'equity.json': equity, 'positions.json': positions, 'trades.json': trades, 'flipEntries.json': flipEntries },
-        'Manually close ' + label + ' via dashboard'
-      );
-      await refresh();
-    } catch (e) {
-      alert('Close failed: ' + e.message + '\n\nSomething may have changed the repo at the same moment (e.g. the bot\'s hourly run) — try again.');
-      if (btn) { btn.disabled = false; btn.textContent = prevText; }
-    }
-  }
-
-  els.ghConnectBtn.addEventListener('click', function () {
-    if (ghToken()) {
-      if (confirm('Disconnect GitHub write access? The reset/close buttons stop working until you reconnect.')) {
-        ghSetToken('');
-        paintGhUi();
-        refresh();
-      }
-      return;
-    }
-    els.ghError.textContent = '';
-    els.ghTokenInput.value = '';
-    els.ghPanel.hidden = false;
-    els.ghTokenInput.focus();
-  });
-  els.ghCancelBtn.addEventListener('click', function () { els.ghPanel.hidden = true; });
-  els.ghSaveBtn.addEventListener('click', async function () {
-    var t = els.ghTokenInput.value.trim();
-    if (!t) return;
-    els.ghSaveBtn.textContent = 'Checking…'; els.ghSaveBtn.disabled = true; els.ghError.textContent = '';
-    try {
-      var res = await fetch('https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO, {
-        headers: { Authorization: 'Bearer ' + t, Accept: 'application/vnd.github+json' },
-      });
-      if (!res.ok) throw new Error('Token check failed (HTTP ' + res.status + ') — make sure it has access to this exact repo.');
-      var data = await res.json();
-      if (!data.permissions || !data.permissions.push) throw new Error('This token doesn\'t have write access — check its Contents permission is set to Read and write.');
-      ghSetToken(t);
-      els.ghPanel.hidden = true;
-      paintGhUi();
-      await refresh();
-    } catch (e) {
-      els.ghError.textContent = e.message;
-    } finally {
-      els.ghSaveBtn.textContent = 'Save'; els.ghSaveBtn.disabled = false;
-    }
-  });
 
   function renderCoins(equity, positions, scores) {
     els.coinGrid.innerHTML = SYMBOLS.map(function (s) {
@@ -532,7 +295,6 @@
       }
       return (
         '<div class="coin">' +
-          '<button type="button" class="resetBtn" data-symbol="' + s.id + '" data-label="' + s.label + '"' + (ghToken() ? '' : ' disabled title="connect GitHub write access first"') + '>reset</button>' +
           '<div class="sym">' + s.label + '</div>' +
           '<div class="bal">' + fmtMoney(bal) + '</div>' +
           '<div class="pnl ' + pnlClass(pnl) + '">' + fmtSigned(pnl) + '</div>' +
@@ -541,10 +303,6 @@
       );
     }).join('');
   }
-  els.coinGrid.addEventListener('click', function (e) {
-    var btn = e.target.closest('.resetBtn');
-    if (btn && !btn.disabled) resetCoin(btn.dataset.symbol, btn.dataset.label, btn);
-  });
 
   var OKX_BASE = 'https://www.okx.com';
   function okxInstId(symbol) { return symbol.replace('USDT', '') + '-USDT-SWAP'; }
@@ -608,16 +366,11 @@
             stat('Margin', fmtMoney(pos.margin)) +
           '</div>' +
           '<div class="posFoot"><span>score ' + (pos.score > 0 ? '+' : '') + pos.score + '</span><span>' + pos.qtyRemaining + ' ' + e.s.label + '</span></div>' +
-          '<button type="button" class="closeBtn" data-symbol="' + pos.symbol + '" data-label="' + e.s.label + '"' + (ghToken() ? '' : ' disabled title="connect GitHub write access first"') + '>Close position</button>' +
         '</div>'
       );
     }).join('') + '</div>';
   }
   var lastMarkPrices = {};
-  els.openPositions.addEventListener('click', function (e) {
-    var btn = e.target.closest('.closeBtn');
-    if (btn && !btn.disabled) closePosition(btn.dataset.symbol, btn.dataset.label, lastMarkPrices[btn.dataset.symbol], btn);
-  });
 
   function renderTrades(trades) {
     if (!trades.length) { els.tradeLog.innerHTML = '<div class="empty">No closed trades yet.</div>'; return; }
@@ -916,7 +669,6 @@
   els.alertsToggle.addEventListener('click', toggleWatch);
   watchLoad();
   paintWatchUi();
-  paintGhUi();
   refresh();
   setInterval(refresh, 60000);
 })();

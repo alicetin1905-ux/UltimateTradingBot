@@ -76,30 +76,10 @@ back to this repo — GitHub Actions runners are ephemeral, so that commit is
 how the bot remembers open positions and balances between runs. No secrets
 or credentials are needed for any of this.
 
-## Manual controls (reset / close)
-
-`index.html` is otherwise read-only, but has two write actions:
-
-- **Reset** (on each coin card) — puts that coin back to its starting
-  $2,000 balance, drops any open position without recording a trade, and
-  clears its history so the next signal is treated as fresh.
-- **Close position** (on each open position card) — closes it right now at
-  the live mark price and records it as a normal trade (`reason: "manual
-  close"`), same as if the bot itself had exited it.
-
-Both need GitHub write access, which the page doesn't have by default —
-click **Connect** and paste in a personal access token (fine-grained,
-scoped to only this repo, `Contents: Read and write` permission). It's
-stored in that browser's `localStorage` only and used only for direct
-calls to `api.github.com`; nothing here can read or use it. The page then
-commits through GitHub's Contents API (one `PUT` per changed file) — a real
-git commit, same as the bot's own hourly ones, just triggered by you
-instead of a schedule. (Not the lower-level Git Data API — fine-grained
-PATs can't call it at all, which is its own GitHub limitation, not
-something to work around here.) Each file's `PUT` is pinned to the sha it
-was last read at, so if the bot happens to commit that same file in the
-same few seconds, the write is rejected rather than silently overwriting
-it — retry the action if that happens.
+`index.html` is a read-only dashboard — the bot's own hourly GitHub
+Actions run is the only thing that writes `state/*.json`. There's no
+manual reset or close from the page; if you want to zero out a coin's
+balance or clear a position, edit `state/*.json` directly and commit.
 
 ## Layout
 
