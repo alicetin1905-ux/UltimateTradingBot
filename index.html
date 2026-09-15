@@ -372,6 +372,15 @@
     if (opts && opts.body) headers['Content-Type'] = 'application/json';
     var res = await fetch('https://api.github.com' + path, Object.assign({ headers: headers }, opts || {}));
     var data = await res.json().catch(function () { return null; });
+    if (res.status === 401) {
+      // Token was valid when connected but has since been revoked/regenerated/
+      // expired — drop it now so the UI stops claiming "connected" and the
+      // next attempt gets a clear prompt to reconnect instead of a bare
+      // "Bad credentials".
+      ghSetToken('');
+      paintGhUi();
+      throw new Error('Your GitHub token is no longer valid (revoked, regenerated, or expired) — click Connect and paste in a current one.');
+    }
     if (!res.ok) throw new Error((data && data.message) || ('GitHub API error ' + res.status));
     return data;
   }
