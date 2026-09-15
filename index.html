@@ -401,9 +401,11 @@
     return written;
   }
 
-  async function resetCoin(symbolId, label) {
+  async function resetCoin(symbolId, label, btn) {
     if (!ghToken()) return;
     if (!confirm('Reset ' + label + ' back to $' + STARTING_BALANCE.toLocaleString('en-US') + '?\n\nThis closes any open ' + label + ' position without recording a trade, and clears its history. Cannot be undone.')) return;
+    var prevText = btn ? btn.textContent : null;
+    if (btn) { btn.disabled = true; btn.textContent = 'Resetting…'; }
     try {
       var fresh = await Promise.all([fetchJson('equity'), fetchJson('positions'), fetchJson('flipEntries'), fetchJson('scores')]);
       var equity = fresh[0], positions = fresh[1], flipEntries = fresh[2], scores = fresh[3];
@@ -418,10 +420,11 @@
       await refresh();
     } catch (e) {
       alert('Reset failed: ' + e.message + '\n\nSomething may have changed the repo at the same moment (e.g. the bot\'s hourly run) — try again.');
+      if (btn) { btn.disabled = false; btn.textContent = prevText; }
     }
   }
 
-  async function closePosition(symbolId, label, markPrice) {
+  async function closePosition(symbolId, label, markPrice, btn) {
     if (!ghToken()) return;
     if (markPrice == null) { alert('No live mark price for ' + label + ' yet — try again in a moment.'); return; }
     try {
@@ -431,6 +434,8 @@
       if (!pos) { alert(label + '’s position is already closed (probably by the bot itself just now).'); await refresh(); return; }
       var pnl = (markPrice - pos.entry) * pos.bias * pos.qtyRemaining;
       if (!confirm('Close ' + label + ' ' + (pos.bias === 1 ? 'LONG' : 'SHORT') + ' @ ' + fmtPrice(markPrice) + ' now?\n\nRealized P&L: ' + fmtSigned(pnl) + '\n\nThe bot may open a new position here again on its next run if the signal is still active.')) return;
+      var prevText = btn ? btn.textContent : null;
+      if (btn) { btn.disabled = true; btn.textContent = 'Closing…'; }
       equity[symbolId] += pnl;
       delete positions[symbolId];
       delete flipEntries[symbolId + ':' + ENTRY_TF];
@@ -445,6 +450,7 @@
       await refresh();
     } catch (e) {
       alert('Close failed: ' + e.message + '\n\nSomething may have changed the repo at the same moment (e.g. the bot\'s hourly run) — try again.');
+      if (btn) { btn.disabled = false; btn.textContent = prevText; }
     }
   }
 
@@ -528,7 +534,7 @@
   }
   els.coinGrid.addEventListener('click', function (e) {
     var btn = e.target.closest('.resetBtn');
-    if (btn && !btn.disabled) resetCoin(btn.dataset.symbol, btn.dataset.label);
+    if (btn && !btn.disabled) resetCoin(btn.dataset.symbol, btn.dataset.label, btn);
   });
 
   var OKX_BASE = 'https://www.okx.com';
@@ -601,7 +607,7 @@
   var lastMarkPrices = {};
   els.openPositions.addEventListener('click', function (e) {
     var btn = e.target.closest('.closeBtn');
-    if (btn && !btn.disabled) closePosition(btn.dataset.symbol, btn.dataset.label, lastMarkPrices[btn.dataset.symbol]);
+    if (btn && !btn.disabled) closePosition(btn.dataset.symbol, btn.dataset.label, lastMarkPrices[btn.dataset.symbol], btn);
   });
 
   function renderTrades(trades) {
