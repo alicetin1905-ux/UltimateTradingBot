@@ -14,5 +14,9 @@
   "DOGEUSDT:60": {
     "bias": -1,
     "price": 0.08279
+  },
+  "BNBUSDT:60": {
+    "bias": 1,
+    "price": 722.8
   }
 }
