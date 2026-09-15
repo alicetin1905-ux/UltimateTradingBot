@@ -76,6 +76,28 @@ back to this repo — GitHub Actions runners are ephemeral, so that commit is
 how the bot remembers open positions and balances between runs. No secrets
 or credentials are needed for any of this.
 
+## Manual controls (reset / close)
+
+`index.html` is otherwise read-only, but has two write actions:
+
+- **Reset** (on each coin card) — puts that coin back to its starting
+  $2,000 balance, drops any open position without recording a trade, and
+  clears its history so the next signal is treated as fresh.
+- **Close position** (on each open position card) — closes it right now at
+  the live mark price and records it as a normal trade (`reason: "manual
+  close"`), same as if the bot itself had exited it.
+
+Both need GitHub write access, which the page doesn't have by default —
+click **Connect** and paste in a personal access token (fine-grained,
+scoped to only this repo, `Contents: Read and write` permission). It's
+stored in that browser's `localStorage` only and used only for direct
+calls to `api.github.com`; nothing here can read or use it. The page then
+commits through GitHub's Git Data API (blob → tree → commit → fast-forward
+the branch ref) — a real git commit, same as the bot's own hourly ones,
+just triggered by you instead of a schedule. If the bot happens to commit
+in the same few seconds, the ref update fails rather than silently
+overwriting it — retry the action if that happens.
+
 ## Layout
 
 ```
