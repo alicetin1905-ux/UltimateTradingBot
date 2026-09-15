@@ -343,11 +343,17 @@
      the only thing that normally writes state/*.json. These two actions
      need a real write path, so they use a personal access token the user
      supplies themselves (stored only in this browser's localStorage, used
-     only for direct calls to api.github.com) to commit through GitHub's Git
-     Data API — blob(s) -> tree -> commit -> fast-forward the ref. A
-     non-fast-forward ref update (something else, i.e. the bot, committed in
-     the few seconds between fetch and write) fails loudly rather than
-     silently overwriting whatever that other commit changed. */
+     only for direct calls to api.github.com).
+
+     Writes go through the Contents API (GET for the current sha, PUT to
+     update), one commit per file — NOT the lower-level Git Data API
+     (blobs/trees/commits/refs), which fine-grained PATs can't call at all
+     ("Resource not accessible by personal access token", confirmed against
+     a real token with Contents: Read and write). That means these several
+     files don't land as one atomic commit, but each individual PUT is still
+     guarded the same way: it's rejected if the file's sha has moved since
+     the GET (something else, i.e. the bot, committed in between), rather
+     than silently overwriting whatever that other commit changed there. */
   function ghToken() {
     try { return localStorage.getItem(GH_TOKEN_KEY) || ''; } catch (e) { return ''; }
   }
@@ -370,33 +376,29 @@
     return data;
   }
 
-  // files: { 'equity.json': {...}, 'positions.json': {...}, ... } — full
-  // new content for each changed state/ file, committed together as one
-  // atomic multi-file commit.
+  // UTF-8-safe base64 encode — plain btoa() only handles Latin1 and throws
+  // on anything outside it.
+  function utf8ToBase64(str) {
+    return btoa(unescape(encodeURIComponent(str)));
+  }
+
+  // files: { 'equity.json': {...}, 'positions.json': {...}, ... } — full new
+  // content for each changed state/ file. One Contents-API PUT per file
+  // (sequential, each its own commit) — see the note above on why this
+  // isn't a single atomic multi-file commit.
   async function ghCommitFiles(files, message) {
-    var refPath = '/repos/' + GH_OWNER + '/' + GH_REPO + '/git/ref/heads/' + GH_BRANCH;
-    var ref = await ghApi(refPath);
-    var baseSha = ref.object.sha;
-    var baseCommit = await ghApi('/repos/' + GH_OWNER + '/' + GH_REPO + '/git/commits/' + baseSha);
-
-    var entries = await Promise.all(Object.keys(files).map(async function (name) {
+    var written = [];
+    for (var name of Object.keys(files)) {
+      var path = '/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/state/' + name;
+      var current = await ghApi(path + '?ref=' + GH_BRANCH);
       var content = JSON.stringify(files[name], null, 2) + '\n';
-      var blob = await ghApi('/repos/' + GH_OWNER + '/' + GH_REPO + '/git/blobs', {
-        method: 'POST', body: JSON.stringify({ content: content, encoding: 'utf-8' }),
+      await ghApi(path, {
+        method: 'PUT',
+        body: JSON.stringify({ message: message, content: utf8ToBase64(content), sha: current.sha, branch: GH_BRANCH }),
       });
-      return { path: 'state/' + name, mode: '100644', type: 'blob', sha: blob.sha };
-    }));
-
-    var tree = await ghApi('/repos/' + GH_OWNER + '/' + GH_REPO + '/git/trees', {
-      method: 'POST', body: JSON.stringify({ base_tree: baseCommit.tree.sha, tree: entries }),
-    });
-    var commit = await ghApi('/repos/' + GH_OWNER + '/' + GH_REPO + '/git/commits', {
-      method: 'POST', body: JSON.stringify({ message: message, tree: tree.sha, parents: [baseSha] }),
-    });
-    // No force — a non-fast-forward update means something else committed
-    // first, and this should fail rather than silently clobber it.
-    await ghApi(refPath, { method: 'PATCH', body: JSON.stringify({ sha: commit.sha }) });
-    return commit.sha;
+      written.push(name);
+    }
+    return written;
   }
 
   async function resetCoin(symbolId, label) {

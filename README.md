@@ -92,11 +92,14 @@ click **Connect** and paste in a personal access token (fine-grained,
 scoped to only this repo, `Contents: Read and write` permission). It's
 stored in that browser's `localStorage` only and used only for direct
 calls to `api.github.com`; nothing here can read or use it. The page then
-commits through GitHub's Git Data API (blob → tree → commit → fast-forward
-the branch ref) — a real git commit, same as the bot's own hourly ones,
-just triggered by you instead of a schedule. If the bot happens to commit
-in the same few seconds, the ref update fails rather than silently
-overwriting it — retry the action if that happens.
+commits through GitHub's Contents API (one `PUT` per changed file) — a real
+git commit, same as the bot's own hourly ones, just triggered by you
+instead of a schedule. (Not the lower-level Git Data API — fine-grained
+PATs can't call it at all, which is its own GitHub limitation, not
+something to work around here.) Each file's `PUT` is pinned to the sha it
+was last read at, so if the bot happens to commit that same file in the
+same few seconds, the write is rejected rather than silently overwriting
+it — retry the action if that happens.
 
 ## Layout
 
