@@ -339,5 +339,28 @@
     "openedAt": 1789491600000,
     "closedAt": 1789516800000,
     "score": -47
+  },
+  {
+    "symbol": "SOLUSDT",
+    "bias": -1,
+    "entry": 96.99,
+    "exit": 98.27866327630421,
+    "pnl": -326.8050068707502,
+    "reason": "stop hit",
+    "openedAt": 1789578000000,
+    "closedAt": 1789592400000,
+    "score": -29
+  },
+  {
+    "symbol": "BNBUSDT",
+    "bias": -1,
+    "entry": 710.7,
+    "exit": 720.5,
+    "qty": 28.14,
+    "pnl": -275.77199999999874,
+    "reason": "signal-flip",
+    "openedAt": 1789506000000,
+    "closedAt": 1789592400000,
+    "score": -67
   }
 ]

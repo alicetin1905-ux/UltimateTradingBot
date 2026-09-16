@@ -1,22 +1,6 @@
 {
-  "BTCUSDT:60": {
-    "bias": -1,
-    "price": 76580
-  },
-  "ETHUSDT:60": {
-    "bias": -1,
-    "price": 2452.78
-  },
-  "DOGEUSDT:60": {
-    "bias": -1,
-    "price": 0.08279
-  },
-  "XRPUSDT:60": {
-    "bias": -1,
-    "price": 1.2773
-  },
-  "SOLUSDT:60": {
-    "bias": -1,
-    "price": 96.99
+  "BNBUSDT:60": {
+    "bias": 1,
+    "price": 720.5
   }
 }
