@@ -1,35 +1,4 @@
 {
-  "BTCUSDT": {
-    "symbol": "BTCUSDT",
-    "bias": -1,
-    "entry": 76580,
-    "stop": 76580,
-    "initialStop": 77362.91037710306,
-    "t1": 75797.08962289694,
-    "t2": 75014.17924579387,
-    "t3": 74231.26886869081,
-    "qtyTotal": 0.261,
-    "qtyRemaining": 0.06525000000000002,
-    "qtyT1": 0.1044,
-    "qtyT2": 0.09135,
-    "qtyT3": 0.06525,
-    "margin": 1998.738,
-    "notional": 19987.38,
-    "riskAmt": 204.33960842389973,
-    "filled": {
-      "t1": true,
-      "t2": true,
-      "t3": false
-    },
-    "breakeven": true,
-    "openedAt": 1789491600000,
-    "score": -47,
-    "fibImpulse": "down",
-    "liqClusterNote": {
-      "stopNear": 78262.92586291667,
-      "targetNear": 76656.81373625
-    }
-  },
   "XRPUSDT": {
     "symbol": "XRPUSDT",
     "bias": -1,
