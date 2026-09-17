@@ -362,5 +362,71 @@
     "openedAt": 1789506000000,
     "closedAt": 1789592400000,
     "score": -67
+  },
+  {
+    "symbol": "ETHUSDT",
+    "bias": 1,
+    "entry": 2434.64,
+    "exit": 2461.79246706966,
+    "pnl": 89.16870185676315,
+    "reason": "T1 hit, stop moved to breakeven",
+    "openedAt": 1789639200000,
+    "closedAt": 1789657200000,
+    "score": 39
+  },
+  {
+    "symbol": "ETHUSDT",
+    "bias": 1,
+    "entry": 2434.64,
+    "exit": 2465.2458218199167,
+    "pnl": 87.94582899953109,
+    "reason": "T2 hit",
+    "openedAt": 1789639200000,
+    "closedAt": 1789657200000,
+    "score": 39
+  },
+  {
+    "symbol": "ETHUSDT",
+    "bias": 1,
+    "entry": 2434.64,
+    "exit": 2434.64,
+    "pnl": 0,
+    "reason": "breakeven stop hit",
+    "openedAt": 1789639200000,
+    "closedAt": 1789657200000,
+    "score": 39
+  },
+  {
+    "symbol": "SOLUSDT",
+    "bias": 1,
+    "entry": 99.8,
+    "exit": 101.09320567449124,
+    "pnl": 103.66336686721839,
+    "reason": "T1 hit, stop moved to breakeven",
+    "openedAt": 1789639200000,
+    "closedAt": 1789657200000,
+    "score": 42
+  },
+  {
+    "symbol": "SOLUSDT",
+    "bias": 1,
+    "entry": 99.8,
+    "exit": 100.18048367433333,
+    "pnl": 26.687124917740043,
+    "reason": "T2 hit",
+    "openedAt": 1789639200000,
+    "closedAt": 1789657200000,
+    "score": 42
+  },
+  {
+    "symbol": "SOLUSDT",
+    "bias": 1,
+    "entry": 99.8,
+    "exit": 99.8,
+    "pnl": 0,
+    "reason": "breakeven stop hit",
+    "openedAt": 1789639200000,
+    "closedAt": 1789657200000,
+    "score": 42
   }
 ]
