@@ -1,1 +1,10 @@
-{}
+{
+  "ETHUSDT:60": {
+    "bias": 1,
+    "price": 2434.64
+  },
+  "SOLUSDT:60": {
+    "bias": 1,
+    "price": 99.8
+  }
+}
