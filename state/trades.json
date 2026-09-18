@@ -582,5 +582,16 @@
     "openedAt": 1789718400000,
     "closedAt": 1789736400000,
     "score": 74
+  },
+  {
+    "symbol": "XRPUSDT",
+    "bias": 1,
+    "entry": 1.3259,
+    "exit": 1.3259,
+    "pnl": 0,
+    "reason": "breakeven stop hit",
+    "openedAt": 1789700400000,
+    "closedAt": 1789750800000,
+    "score": 35
   }
 ]
