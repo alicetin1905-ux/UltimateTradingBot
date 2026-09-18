@@ -505,5 +505,27 @@
     "openedAt": 1789657200000,
     "closedAt": 1789700400000,
     "score": 50
+  },
+  {
+    "symbol": "BTCUSDT",
+    "bias": 1,
+    "entry": 76750,
+    "exit": 76750,
+    "pnl": 0,
+    "reason": "breakeven stop hit",
+    "openedAt": 1789657200000,
+    "closedAt": 1789718400000,
+    "score": 32
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "bias": 1,
+    "entry": 0.08195,
+    "exit": 0.08195,
+    "pnl": 0,
+    "reason": "breakeven stop hit",
+    "openedAt": 1789657200000,
+    "closedAt": 1789718400000,
+    "score": 50
   }
 ]
