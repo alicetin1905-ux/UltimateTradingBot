@@ -6,5 +6,21 @@
   "BNBUSDT:60": {
     "bias": 1,
     "price": 727.5
+  },
+  "BTCUSDT:60": {
+    "bias": 1,
+    "price": 77346
+  },
+  "ETHUSDT:60": {
+    "bias": 1,
+    "price": 2477.96
+  },
+  "XRPUSDT:60": {
+    "bias": 1,
+    "price": 1.3259
+  },
+  "DOGEUSDT:60": {
+    "bias": 1,
+    "price": 0.08445
   }
 }
