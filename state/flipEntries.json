@@ -1,1 +1,18 @@
-{}
+{
+  "BTCUSDT:60": {
+    "bias": 1,
+    "price": 81302.5
+  },
+  "ETHUSDT:60": {
+    "bias": 1,
+    "price": 2639.74
+  },
+  "XRPUSDT:60": {
+    "bias": 1,
+    "price": 1.4123
+  },
+  "BNBUSDT:60": {
+    "bias": 1,
+    "price": 766.2
+  }
+}
