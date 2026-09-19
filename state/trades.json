@@ -615,5 +615,27 @@
     "openedAt": 1789808400000,
     "closedAt": 1789822800000,
     "score": 45
+  },
+  {
+    "symbol": "BTCUSDT",
+    "bias": 1,
+    "entry": 81302.5,
+    "exit": 81904.67704431426,
+    "pnl": 59.01335034279744,
+    "reason": "T1 hit, stop moved to breakeven",
+    "openedAt": 1789808400000,
+    "closedAt": 1789833600000,
+    "score": 61
+  },
+  {
+    "symbol": "XRPUSDT",
+    "bias": 1,
+    "entry": 1.4123,
+    "exit": 1.4123,
+    "pnl": 0,
+    "reason": "breakeven stop hit",
+    "openedAt": 1789808400000,
+    "closedAt": 1789833600000,
+    "score": 45
   }
 ]

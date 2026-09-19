@@ -3,13 +3,13 @@
     "symbol": "BTCUSDT",
     "bias": 1,
     "entry": 81302.5,
-    "stop": 80700.32295568574,
+    "stop": 81302.5,
     "initialStop": 80700.32295568574,
     "t1": 81904.67704431426,
     "t2": 82506.85408862852,
     "t3": 83109.03113294278,
     "qtyTotal": 0.245,
-    "qtyRemaining": 0.245,
+    "qtyRemaining": 0.147,
     "qtyT1": 0.098,
     "qtyT2": 0.08574999999999999,
     "qtyT3": 0.06125,
@@ -17,11 +17,11 @@
     "notional": 19919.1125,
     "riskAmt": 147.5333758569936,
     "filled": {
-      "t1": false,
+      "t1": true,
       "t2": false,
       "t3": false
     },
-    "breakeven": false,
+    "breakeven": true,
     "openedAt": 1789808400000,
     "score": 61,
     "fibImpulse": "up",
@@ -59,37 +59,6 @@
     "liqClusterNote": {
       "stopNear": 2477.3867731249998,
       "targetNear": 2722.2064562916667
-    }
-  },
-  "XRPUSDT": {
-    "symbol": "XRPUSDT",
-    "bias": 1,
-    "entry": 1.4123,
-    "stop": 1.4123,
-    "initialStop": 1.3878244753583975,
-    "t1": 1.4367755246416027,
-    "t2": 1.4103951148008333,
-    "t3": 1.485726573924808,
-    "qtyTotal": 14161,
-    "qtyRemaining": 3540.249999999999,
-    "qtyT1": 5664.400000000001,
-    "qtyT2": 4956.349999999999,
-    "qtyT3": 3540.25,
-    "margin": 1999.9580300000002,
-    "notional": 19999.5803,
-    "riskAmt": 346.59790444973487,
-    "filled": {
-      "t1": true,
-      "t2": true,
-      "t3": false
-    },
-    "breakeven": true,
-    "openedAt": 1789808400000,
-    "score": 45,
-    "fibImpulse": "up",
-    "liqClusterNote": {
-      "stopNear": 1.3448877704166669,
-      "targetNear": 1.4132215579166667
     }
   },
   "BNBUSDT": {
