@@ -65,13 +65,13 @@
     "symbol": "XRPUSDT",
     "bias": 1,
     "entry": 1.4123,
-    "stop": 1.3878244753583975,
+    "stop": 1.4123,
     "initialStop": 1.3878244753583975,
     "t1": 1.4367755246416027,
     "t2": 1.4103951148008333,
     "t3": 1.485726573924808,
     "qtyTotal": 14161,
-    "qtyRemaining": 14161,
+    "qtyRemaining": 3540.249999999999,
     "qtyT1": 5664.400000000001,
     "qtyT2": 4956.349999999999,
     "qtyT3": 3540.25,
@@ -79,11 +79,11 @@
     "notional": 19999.5803,
     "riskAmt": 346.59790444973487,
     "filled": {
-      "t1": false,
-      "t2": false,
+      "t1": true,
+      "t2": true,
       "t3": false
     },
-    "breakeven": false,
+    "breakeven": true,
     "openedAt": 1789808400000,
     "score": 45,
     "fibImpulse": "up",
@@ -121,6 +121,37 @@
     "liqClusterNote": {
       "stopNear": 724.34412875,
       "targetNear": 779.76320125
+    }
+  },
+  "DOGEUSDT": {
+    "symbol": "DOGEUSDT",
+    "bias": 1,
+    "entry": 0.08881,
+    "stop": 0.0871173000079805,
+    "initialStop": 0.0871173000079805,
+    "t1": 0.0905026999920195,
+    "t2": 0.09091948449925,
+    "t3": 0.0938880999760585,
+    "qtyTotal": 225199,
+    "qtyRemaining": 225199,
+    "qtyT1": 90079.6,
+    "qtyT2": 78819.65,
+    "qtyT3": 56299.75,
+    "margin": 1999.9923190000002,
+    "notional": 19999.92319,
+    "riskAmt": 381.1943455027994,
+    "filled": {
+      "t1": false,
+      "t2": false,
+      "t3": false
+    },
+    "breakeven": false,
+    "openedAt": 1789822800000,
+    "score": 55,
+    "fibImpulse": "up",
+    "liqClusterNote": {
+      "stopNear": 0.08113422395833333,
+      "targetNear": 0.091101687875
     }
   }
 }
