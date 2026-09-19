@@ -670,5 +670,27 @@
     "openedAt": 1789822800000,
     "closedAt": 1789844400000,
     "score": 55
+  },
+  {
+    "symbol": "BNBUSDT",
+    "bias": 1,
+    "entry": 766.2,
+    "exit": 757.9004789993879,
+    "pnl": -216.61749811597628,
+    "reason": "stop hit",
+    "openedAt": 1789808400000,
+    "closedAt": 1789851600000,
+    "score": 55
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "bias": 1,
+    "entry": 0.08881,
+    "exit": 0.08881,
+    "pnl": 0,
+    "reason": "breakeven stop hit",
+    "openedAt": 1789822800000,
+    "closedAt": 1789851600000,
+    "score": 55
   }
 ]

@@ -30,68 +30,6 @@
       "targetNear": 2722.2064562916667
     }
   },
-  "BNBUSDT": {
-    "symbol": "BNBUSDT",
-    "bias": 1,
-    "entry": 766.2,
-    "stop": 757.9004789993879,
-    "initialStop": 757.9004789993879,
-    "t1": 774.4995210006122,
-    "t2": 778.2036748475,
-    "t3": 791.0985630018364,
-    "qtyTotal": 26.1,
-    "qtyRemaining": 26.1,
-    "qtyT1": 10.440000000000001,
-    "qtyT2": 9.135,
-    "qtyT3": 6.525,
-    "margin": 1999.7820000000004,
-    "notional": 19997.820000000003,
-    "riskAmt": 216.61749811597628,
-    "filled": {
-      "t1": false,
-      "t2": false,
-      "t3": false
-    },
-    "breakeven": false,
-    "openedAt": 1789808400000,
-    "score": 55,
-    "fibImpulse": "up",
-    "liqClusterNote": {
-      "stopNear": 724.34412875,
-      "targetNear": 779.76320125
-    }
-  },
-  "DOGEUSDT": {
-    "symbol": "DOGEUSDT",
-    "bias": 1,
-    "entry": 0.08881,
-    "stop": 0.08881,
-    "initialStop": 0.0871173000079805,
-    "t1": 0.0905026999920195,
-    "t2": 0.09091948449925,
-    "t3": 0.0938880999760585,
-    "qtyTotal": 225199,
-    "qtyRemaining": 56299.75,
-    "qtyT1": 90079.6,
-    "qtyT2": 78819.65,
-    "qtyT3": 56299.75,
-    "margin": 1999.9923190000002,
-    "notional": 19999.92319,
-    "riskAmt": 381.1943455027994,
-    "filled": {
-      "t1": true,
-      "t2": true,
-      "t3": false
-    },
-    "breakeven": true,
-    "openedAt": 1789822800000,
-    "score": 55,
-    "fibImpulse": "up",
-    "liqClusterNote": {
-      "stopNear": 0.08113422395833333,
-      "targetNear": 0.091101687875
-    }
-  },
   "BTCUSDT": {
     "symbol": "BTCUSDT",
     "bias": 1,
