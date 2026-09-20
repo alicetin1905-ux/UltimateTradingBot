@@ -6,5 +6,9 @@
   "XRPUSDT:60": {
     "bias": 1,
     "price": 1.4123
+  },
+  "BTCUSDT:60": {
+    "bias": 1,
+    "price": 81231.2
   }
 }
