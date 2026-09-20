@@ -18,5 +18,9 @@
   "DOGEUSDT:60": {
     "bias": -1,
     "price": 0.08536
+  },
+  "SOLUSDT:60": {
+    "bias": -1,
+    "price": 108.01
   }
 }

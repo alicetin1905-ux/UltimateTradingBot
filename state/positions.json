@@ -153,5 +153,36 @@
       "stopNear": 0.0864236725,
       "targetNear": 0.08133514950000001
     }
+  },
+  "SOLUSDT": {
+    "symbol": "SOLUSDT",
+    "bias": -1,
+    "entry": 108.01,
+    "stop": 109.6191009942913,
+    "initialStop": 109.6191009942913,
+    "t1": 106.40089900570871,
+    "t2": 104.79179801141741,
+    "t3": 103.18269701712612,
+    "qtyTotal": 185.10000000000002,
+    "qtyRemaining": 185.10000000000002,
+    "qtyT1": 74.04,
+    "qtyT2": 64.78500000000001,
+    "qtyT3": 46.275000000000006,
+    "margin": 1999.2651,
+    "notional": 19992.651,
+    "riskAmt": 297.844594043319,
+    "filled": {
+      "t1": false,
+      "t2": false,
+      "t3": false
+    },
+    "breakeven": false,
+    "openedAt": 1789898400000,
+    "score": -27,
+    "fibImpulse": "down",
+    "liqClusterNote": {
+      "stopNear": 109.06143004166668,
+      "targetNear": 100.71280404166667
+    }
   }
 }
