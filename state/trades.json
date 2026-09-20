@@ -692,5 +692,38 @@
     "openedAt": 1789822800000,
     "closedAt": 1789851600000,
     "score": 55
+  },
+  {
+    "symbol": "BTCUSDT",
+    "bias": 1,
+    "entry": 81302.5,
+    "exit": 80804.13281506897,
+    "pnl": -126.0868977875516,
+    "reason": "stop hit",
+    "openedAt": 1789844400000,
+    "closedAt": 1789880400000,
+    "score": 44
+  },
+  {
+    "symbol": "ETHUSDT",
+    "bias": 1,
+    "entry": 2639.74,
+    "exit": 2602.2147749885853,
+    "pnl": -284.06595333640763,
+    "reason": "stop hit",
+    "openedAt": 1789808400000,
+    "closedAt": 1789880400000,
+    "score": 64
+  },
+  {
+    "symbol": "XRPUSDT",
+    "bias": 1,
+    "entry": 1.4123,
+    "exit": 1.3889336219112596,
+    "pnl": -352.2715160658523,
+    "reason": "stop hit",
+    "openedAt": 1789844400000,
+    "closedAt": 1789880400000,
+    "score": 54
   }
 ]
