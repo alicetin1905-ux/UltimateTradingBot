@@ -725,5 +725,16 @@
     "openedAt": 1789844400000,
     "closedAt": 1789880400000,
     "score": 54
+  },
+  {
+    "symbol": "BNBUSDT",
+    "bias": 1,
+    "entry": 763.9,
+    "exit": 774.7532881808704,
+    "pnl": 113.65563383007522,
+    "reason": "T1 hit, stop moved to breakeven",
+    "openedAt": 1789923600000,
+    "closedAt": 1789945200000,
+    "score": 64
   }
 ]

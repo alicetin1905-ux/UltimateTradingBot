@@ -1,32 +1,32 @@
 {
   "BTCUSDT": {
-    "score": 68,
+    "score": 69,
     "bias": 1,
-    "at": 1789939535423
+    "at": 1789949205194
   },
   "ETHUSDT": {
-    "score": 68,
-    "bias": 1,
-    "at": 1789939535737
-  },
-  "SOLUSDT": {
-    "score": 62,
-    "bias": 1,
-    "at": 1789939536051
-  },
-  "XRPUSDT": {
-    "score": 65,
-    "bias": 1,
-    "at": 1789939536360
-  },
-  "BNBUSDT": {
     "score": 70,
     "bias": 1,
-    "at": 1789939536666
+    "at": 1789949205592
+  },
+  "SOLUSDT": {
+    "score": 77,
+    "bias": 1,
+    "at": 1789949205908
+  },
+  "XRPUSDT": {
+    "score": 63,
+    "bias": 1,
+    "at": 1789949206218
+  },
+  "BNBUSDT": {
+    "score": 76,
+    "bias": 1,
+    "at": 1789949206584
   },
   "DOGEUSDT": {
-    "score": 72,
+    "score": 69,
     "bias": 1,
-    "at": 1789939536973
+    "at": 1789949206969
   }
 }
