@@ -736,5 +736,82 @@
     "openedAt": 1789923600000,
     "closedAt": 1789945200000,
     "score": 64
+  },
+  {
+    "symbol": "ETHUSDT",
+    "bias": 1,
+    "entry": 2625.1,
+    "exit": 2659.161754609852,
+    "pnl": 103.68398103238938,
+    "reason": "T1 hit, stop moved to breakeven",
+    "openedAt": 1789923600000,
+    "closedAt": 1789966800000,
+    "score": 62
+  },
+  {
+    "symbol": "ETHUSDT",
+    "bias": 1,
+    "entry": 2625.1,
+    "exit": 2670.271193623,
+    "pnl": 120.31347421486025,
+    "reason": "T2 hit",
+    "openedAt": 1789923600000,
+    "closedAt": 1789966800000,
+    "score": 62
+  },
+  {
+    "symbol": "XRPUSDT",
+    "bias": 1,
+    "entry": 1.4021,
+    "exit": 1.4249871455453336,
+    "pnl": 130.58489762345576,
+    "reason": "T1 hit, stop moved to breakeven",
+    "openedAt": 1789923600000,
+    "closedAt": 1789966800000,
+    "score": 55
+  },
+  {
+    "symbol": "XRPUSDT",
+    "bias": 1,
+    "entry": 1.4021,
+    "exit": 1.4103951148008333,
+    "pnl": 41.4125311316809,
+    "reason": "T2 hit",
+    "openedAt": 1789923600000,
+    "closedAt": 1789966800000,
+    "score": 55
+  },
+  {
+    "symbol": "BNBUSDT",
+    "bias": 1,
+    "entry": 763.9,
+    "exit": 763.9,
+    "pnl": 0,
+    "reason": "breakeven stop hit",
+    "openedAt": 1789923600000,
+    "closedAt": 1789966800000,
+    "score": 64
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "bias": 1,
+    "entry": 0.08696,
+    "exit": 0.088420457542775,
+    "pnl": 134.35625210512924,
+    "reason": "T1 hit, stop moved to breakeven",
+    "openedAt": 1789923600000,
+    "closedAt": 1789966800000,
+    "score": 50
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "bias": 1,
+    "entry": 0.08696,
+    "exit": 0.08699820053375001,
+    "pnl": 3.0750092650083665,
+    "reason": "T2 hit",
+    "openedAt": 1789923600000,
+    "closedAt": 1789966800000,
+    "score": 50
   }
 ]
