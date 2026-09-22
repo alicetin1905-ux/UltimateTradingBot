@@ -81,46 +81,19 @@ function runSymbol({ symbol, data, state }) {
   // 2) No open position and the score wants one: check confluence, sizing
   //    sanity, and liquidity-refine the plan before opening it on paper.
   if (!state.positions[symbol] && analysis.bias !== 0 && analysis.plan) {
-    const plan = analysis.plan;
-
-    const fibCheck = fib.confluence({
-      candles1h: data.candles[config.ENTRY_TF],
-      thresholdPct: config.FIB_THRESHOLD[symbol] ?? 2,
-      windowN: config.FIB_WINDOW,
-      bias: analysis.bias,
-    });
-    if (!fibCheck.agrees) {
-      events.push({ symbol, type: 'hold', reason: `ATLAS wants ${dirName(analysis.bias)} but GoldenRatio's last impulse still points the other way`, score: analysis.score });
+    const check = entryFilters({ symbol, data, analysis });
+    if (!check.ok) {
+      events.push({ symbol, type: 'hold', reason: check.reason, score: analysis.score });
       return events;
     }
 
-    const chaseDist = Math.abs(analysis.price - plan.entry);
-    if (chaseDist > config.MAX_CHASE_ATR * analysis.atr) {
-      events.push({ symbol, type: 'hold', reason: 'price has drifted too far from the flip entry to still take it', score: analysis.score });
+    const opened = openEntry({ symbol, data, analysis, plan: analysis.plan, fibCheck: check.fibCheck });
+    if (!opened.position) {
+      events.push({ symbol, type: 'hold', reason: opened.reason, score: analysis.score });
       return events;
     }
-
-    if (plan.qty <= 0 || plan.belowMin) {
-      events.push({ symbol, type: 'hold', reason: 'position size rounds to zero at this risk/entry/stop', score: analysis.score });
-      return events;
-    }
-
-    const clusters = liquidity.estimateClusters(
-      data.candles[config.ENTRY_TF].slice(0, -1),
-      config.LEV_TIERS,
-      config.LIQ_MMR,
-    );
-    const refined = liquidity.refinePlan(plan, clusters);
-
-    const position = openPositionFromPlan(symbol, refined, analysis, fibCheck);
-    state.positions[symbol] = position;
-    events.push({
-      symbol, type: 'enter', bias: analysis.bias, score: analysis.score,
-      entry: refined.entry, stop: refined.stop, t1: refined.t1, t2: refined.t2, t3: refined.t3,
-      qty: refined.qty, margin: refined.margin, riskAmt: refined.riskAmt,
-      fibNote: fibCheck.impulse ? `${fibCheck.impulse.dir} impulse agrees${fibCheck.inPocket ? ', price in golden pocket' : ''}` : 'no recent GoldenRatio impulse (neutral)',
-      liqNote: refined.liqClusterNote,
-    });
+    state.positions[symbol] = opened.position;
+    events.push(opened.event);
   } else if (!state.positions[symbol]) {
     events.push({ symbol, type: 'flat', reason: analysis.bias === 0 ? 'score inside the stand-aside band' : 'no plan', score: analysis.score });
   }
@@ -129,6 +102,52 @@ function runSymbol({ symbol, data, state }) {
 }
 
 function dirName(bias) { return bias === 1 ? 'long' : bias === -1 ? 'short' : 'flat'; }
+
+// Signal-side entry gates that don't depend on account size: GoldenRatio
+// confluence and the max-chase distance from the flip entry. Shared with the
+// pooled-balance runner (portfolio.js), which sizes the plan itself.
+function entryFilters({ symbol, data, analysis }) {
+  const fibCheck = fib.confluence({
+    candles1h: data.candles[config.ENTRY_TF],
+    thresholdPct: config.FIB_THRESHOLD[symbol] ?? 2,
+    windowN: config.FIB_WINDOW,
+    bias: analysis.bias,
+  });
+  if (!fibCheck.agrees) {
+    return { ok: false, reason: `ATLAS wants ${dirName(analysis.bias)} but GoldenRatio's last impulse still points the other way` };
+  }
+
+  const chaseDist = Math.abs(analysis.price - analysis.plan.entry);
+  if (chaseDist > config.MAX_CHASE_ATR * analysis.atr) {
+    return { ok: false, reason: 'price has drifted too far from the flip entry to still take it' };
+  }
+  return { ok: true, fibCheck };
+}
+
+// Takes an already-sized plan, liquidity-refines it and builds the paper
+// position + its 'enter' event. Returns { reason } instead if it sizes to zero.
+function openEntry({ symbol, data, analysis, plan, fibCheck }) {
+  if (plan.qty <= 0 || plan.belowMin) {
+    return { reason: 'position size rounds to zero at this risk/entry/stop' };
+  }
+
+  const clusters = liquidity.estimateClusters(
+    data.candles[config.ENTRY_TF].slice(0, -1),
+    config.LEV_TIERS,
+    config.LIQ_MMR,
+  );
+  const refined = liquidity.refinePlan(plan, clusters);
+
+  const position = openPositionFromPlan(symbol, refined, analysis, fibCheck);
+  const event = {
+    symbol, type: 'enter', bias: analysis.bias, score: analysis.score,
+    entry: refined.entry, stop: refined.stop, t1: refined.t1, t2: refined.t2, t3: refined.t3,
+    qty: refined.qty, margin: refined.margin, riskAmt: refined.riskAmt,
+    fibNote: fibCheck.impulse ? `${fibCheck.impulse.dir} impulse agrees${fibCheck.inPocket ? ', price in golden pocket' : ''}` : 'no recent GoldenRatio impulse (neutral)',
+    liqNote: refined.liqClusterNote,
+  };
+  return { position, event };
+}
 
 function openPositionFromPlan(symbol, plan, analysis, fibCheck) {
   const split = config.TARGET_SPLIT;
@@ -218,4 +237,4 @@ function simulatePositionOutcome(position, candles) {
   return { closed: false, position: pos, realizedDelta, events };
 }
 
-module.exports = { runSymbol, simulatePositionOutcome };
+module.exports = { runSymbol, simulatePositionOutcome, entryFilters, openEntry, closeTradeRecord };

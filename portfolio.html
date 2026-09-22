@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>UltimateTradingBot</title>
+<title>Portfolio 1000</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -159,19 +159,31 @@
   #alertsToggle.on{ color:var(--bot); border-color:rgba(185,139,255,0.45); }
   #alertsHint{ font-size:10.5px; line-height:1.5; color:var(--text-tertiary); margin:-6px 0 14px; }
   #alertsHint:empty{ display:none; margin:0; }
+
+  .navLink{ font-family:var(--mono); font-size:10.5px; color:var(--bot); text-decoration:none; }
+  .rules{ display:flex; flex-wrap:wrap; gap:6px; margin:0 0 14px; }
+  .rules .chip{
+    font-family:var(--mono); font-size:10.5px; padding:4px 9px; border-radius:7px;
+    background:var(--panel2); border:1px solid var(--border); color:var(--text-secondary);
+  }
+  .rules .chip b{ color:var(--text-primary); font-weight:700; }
+  .slotBar{ display:flex; gap:5px; margin-top:8px; }
+  .slotBar span{ width:26px; height:6px; border-radius:3px; background:var(--panel2); border:1px solid var(--border); }
+  .slotBar span.on{ background:var(--bot); border-color:var(--bot); }
+  .coin.inPos{ border-color:rgba(185,139,255,0.45); }
 </style>
 </head>
 <body>
 
 <div class="head">
-  <h1>UltimateTradingBot</h1>
-  <div class="sub">Paper trading · ATLAS + GoldenRatio + CRUCIBLE</div>
-  <a href="portfolio.html" style="font-family:var(--mono); font-size:10.5px; color:var(--bot); text-decoration:none;">1000 USDT portfolio →</a>
+  <h1>Portfolio · 1000 USDT</h1>
+  <a class="navLink" href="index.html">← per-coin bot</a>
 </div>
 
 <div class="banner">
-  <b>Paper trading only</b> — no API keys, no exchange account, no real orders. Every number below is a simulated
-  balance the bot tracks against its own entry/SL/TP decisions, read straight from its GitHub Actions run state.
+  <b>Paper trading only</b> — a separate account from the per-coin bot: one shared balance for all six coins,
+  same ATLAS + GoldenRatio + CRUCIBLE signals. When more coins qualify than there are free slots, the strongest score wins.
+  No API keys, no exchange account, no real orders.
 </div>
 
 <div style="display:flex; align-items:center; gap:8px; margin:-6px 0 6px;">
@@ -180,20 +192,24 @@
 </div>
 <div id="alertsHint"></div>
 
+<div class="rules" id="rules"></div>
+
 <div class="totalCard">
   <div>
     <div class="label">Total equity</div>
     <div class="value" id="totalValue">—</div>
     <div class="pnl flat" id="totalPnl">—</div>
     <div class="breakdown" id="totalBreakdown"></div>
+    <div class="slotBar" id="slotBar"></div>
   </div>
   <div style="text-align:right">
     <div class="label">Started</div>
     <div class="value" id="startedValue" style="font-size:15px; color:var(--text-secondary)">—</div>
-    <a class="resetAccountBtn" href="https://github.com/alicetin1905-ux/UltimateTradingBot/actions/workflows/reset.yml" target="_blank" rel="noopener" title="Opens GitHub — click &quot;Run workflow&quot; there to confirm">Reset account</a>
+    <a class="resetAccountBtn" href="https://github.com/alicetin1905-ux/UltimateTradingBot/actions/workflows/portfolio-reset.yml" target="_blank" rel="noopener" title="Opens GitHub — click &quot;Run workflow&quot; there to confirm">Reset portfolio</a>
   </div>
 </div>
 
+<h2>Signals</h2>
 <div class="grid" id="coinGrid"></div>
 
 <h2>Performance</h2>
@@ -222,15 +238,16 @@
     { id: 'BNBUSDT', label: 'BNB' },
     { id: 'DOGEUSDT', label: 'DOGE' },
   ];
-  var STARTING_BALANCE = 2000;
   var SCORE_THRESHOLD = 25; // matches config.js SCORE_THRESHOLD — the |score| that triggers an entry
   var ENTRY_TF = '60';      // matches config.js ENTRY_TF — how flipEntries.json keys are built ("SYMBOL:60")
-  var RAW_BASE = 'https://raw.githubusercontent.com/alicetin1905-ux/UltimateTradingBot/main/state/';
+  var RAW_BASE = 'https://raw.githubusercontent.com/alicetin1905-ux/UltimateTradingBot/main/state/portfolio/';
 
   var els = {
     totalValue: document.getElementById('totalValue'),
     totalPnl: document.getElementById('totalPnl'),
     totalBreakdown: document.getElementById('totalBreakdown'),
+    rules: document.getElementById('rules'),
+    slotBar: document.getElementById('slotBar'),
     startedValue: document.getElementById('startedValue'),
     coinGrid: document.getElementById('coinGrid'),
     openPositions: document.getElementById('openPositions'),
@@ -272,45 +289,58 @@
     return res.json();
   }
 
-  function renderCoins(equity, positions, scores) {
+  // One card per coin: its live score and how close it is to an entry, or
+  // the position it holds. There are no per-coin balances in this account.
+  function renderCoins(positions, scores, markPrices) {
     els.coinGrid.innerHTML = SYMBOLS.map(function (s) {
-      var bal = equity[s.id];
-      if (bal == null) return '';
-      var pnl = bal - STARTING_BALANCE;
       var pos = positions[s.id];
+      var sc = scores[s.id];
       var extraHtml;
       if (pos) {
         var dir = pos.bias === 1 ? 'long' : 'short';
+        var mark = markPrices[s.id];
+        var upnl = mark != null ? (mark - pos.entry) * pos.bias * pos.qtyRemaining : null;
         extraHtml =
+          '<div class="pnl ' + (upnl == null ? 'flat' : pnlClass(upnl)) + '">' + (upnl == null ? 'mark unavailable' : fmtSigned(upnl) + ' open') + '</div>' +
           '<div class="pos ' + dir + '">' +
             '<span class="dir">' + dir.toUpperCase() + '</span> @ ' + fmtPrice(pos.entry) + '<br>' +
             'SL ' + fmtPrice(pos.stop) + ' · T1 ' + fmtPrice(pos.t1) + (pos.filled && pos.filled.t1 ? ' ✓' : '') +
             ' · T2 ' + fmtPrice(pos.t2) + (pos.filled && pos.filled.t2 ? ' ✓' : '') +
             ' · T3 ' + fmtPrice(pos.t3) +
           '</div>';
+      } else if (sc) {
+        var pct = Math.max(0, Math.min(100, Math.round((Math.abs(sc.score) / SCORE_THRESHOLD) * 100)));
+        var dirWord = sc.score > 0 ? 'long' : sc.score < 0 ? 'short' : '—';
+        extraHtml =
+          '<div class="pnl flat">no position</div>' +
+          '<div class="proximity">' +
+            '<div class="proximityTrack"><div class="proximityFill" style="width:' + pct + '%"></div></div>' +
+            '<div class="proximityLabel">' + pct + '% to entry · ' + dirWord + '</div>' +
+          '</div>';
       } else {
-        var sc = scores[s.id];
-        if (sc) {
-          var pct = Math.max(0, Math.min(100, Math.round((Math.abs(sc.score) / SCORE_THRESHOLD) * 100)));
-          var dirWord = sc.score > 0 ? 'long' : sc.score < 0 ? 'short' : '—';
-          extraHtml =
-            '<div class="proximity">' +
-              '<div class="proximityTrack"><div class="proximityFill" style="width:' + pct + '%"></div></div>' +
-              '<div class="proximityLabel">' + pct + '% to entry · score ' + (sc.score > 0 ? '+' : '') + sc.score + ' (' + dirWord + ')</div>' +
-            '</div>';
-        } else {
-          extraHtml = '<div class="noPos">no open position</div>';
-        }
+        extraHtml = '<div class="noPos">no score yet — waits for the next hourly run</div>';
       }
+      var scoreTxt = sc ? (sc.score > 0 ? '+' : '') + sc.score : '—';
       return (
-        '<div class="coin">' +
+        '<div class="coin' + (pos ? ' inPos' : '') + '">' +
           '<div class="sym">' + s.label + '</div>' +
-          '<div class="bal">' + fmtMoney(bal) + '</div>' +
-          '<div class="pnl ' + pnlClass(pnl) + '">' + fmtSigned(pnl) + '</div>' +
+          '<div class="bal">score ' + scoreTxt + '</div>' +
           extraHtml +
         '</div>'
       );
     }).join('');
+  }
+
+  function renderRules(account, openCount) {
+    var max = account.maxOpenPositions || 3;
+    els.rules.innerHTML =
+      '<span class="chip">Risk <b>' + (account.riskPct != null ? account.riskPct : '—') + '%</b> of balance / trade</span>' +
+      '<span class="chip">Leverage <b>' + (account.leverage != null ? account.leverage : '—') + 'x</b></span>' +
+      '<span class="chip">Max <b>' + max + '</b> open positions</span>' +
+      '<span class="chip">Margin cap <b>' + fmtMoney(account.balance / max) + '</b> / position</span>';
+    var bars = '';
+    for (var i = 0; i < max; i++) bars += '<span' + (i < openCount ? ' class="on"' : '') + '></span>';
+    els.slotBar.innerHTML = bars;
   }
 
   var OKX_BASE = 'https://www.okx.com';
@@ -427,7 +457,7 @@
 
   // Reconstructs equity-over-time from trades.json alone (no separate
   // history file to maintain): sort every realized fill chronologically and
-  // walk a running total forward from the six coins' combined starting balance.
+  // walk a running total forward from the shared starting balance.
   function buildEquitySeries(trades, startedTotal) {
     var sorted = trades.slice().sort(function (a, b) { return a.closedAt - b.closedAt; });
     var running = startedTotal;
@@ -562,7 +592,7 @@
      gap), just had a new entry taken. The very first successful fetch only
      primes this baseline — it never fires for positions that were already
      open before the page loaded. */
-  var WATCH_KEY = 'ultimatetradingbot-watch-v1';
+  var WATCH_KEY = 'ultimatetradingbot-portfolio-watch-v1';
   var watch = { on: false, sys: false };
   var lastPositions = null;
 
@@ -605,10 +635,10 @@
     if (!watch.sys) return;
     var label = (SYMBOLS.find(function (s) { return s.id === symbol; }) || { label: symbol }).label;
     var dir = pos.bias === 1 ? 'LONG' : 'SHORT';
-    var title = 'UltimateTradingBot — ' + label;
+    var title = 'Portfolio 1000 — ' + label;
     var body = dir + ' @ ' + fmtPrice(pos.entry) + ' · SL ' + fmtPrice(pos.stop) + ' · risk ' + fmtMoney(pos.riskAmt);
     try {
-      var n = new Notification(title, { body: body, tag: 'bot-entry-' + symbol, renotify: false });
+      var n = new Notification(title, { body: body, tag: 'portfolio-entry-' + symbol, renotify: false });
       n.onclick = function () { try { window.focus(); } catch (e) {} n.close(); };
     } catch (e) {}
   }
@@ -628,17 +658,20 @@
     els.refreshBtn.textContent = 'Loading…';
     try {
       var results = await Promise.all([
-        fetchJson('equity'), fetchJson('positions'), fetchJson('trades'),
+        fetchJson('account'), fetchJson('positions'), fetchJson('trades'),
         fetchJson('scores').catch(function () { return {}; }),
       ]);
-      var equity = results[0], positions = results[1], trades = results[2], scores = results[3];
+      var account = results[0], positions = results[1], trades = results[2], scores = results[3];
 
       var openSymbols = Object.keys(positions);
       var markPrices = openSymbols.length ? await fetchMarkPrices(openSymbols) : {};
       lastMarkPrices = markPrices;
 
-      var balance = 0, started = 0;
-      SYMBOLS.forEach(function (s) { if (equity[s.id] != null) { balance += equity[s.id]; started += STARTING_BALANCE; } });
+      var balance = account.balance, started = account.startingBalance;
+      var marginUsed = openSymbols.reduce(function (sum, symbol) {
+        var p = positions[symbol];
+        return sum + p.margin * (p.qtyTotal ? p.qtyRemaining / p.qtyTotal : 1);
+      }, 0);
 
       var unrealized = 0, unrealizedKnown = 0;
       openSymbols.forEach(function (symbol) {
@@ -654,12 +687,15 @@
       els.totalValue.textContent = fmtMoney(total);
       els.totalPnl.textContent = fmtSigned(pnl) + ' (' + (pnl >= 0 ? '+' : '') + (started ? (pnl / started * 100).toFixed(2) : '0.00') + '%)';
       els.totalPnl.className = 'pnl ' + pnlClass(pnl);
-      els.totalBreakdown.textContent = openSymbols.length
-        ? 'balance ' + fmtMoney(balance) + ' · unrealized ' + fmtSigned(unrealized) + (unrealizedKnown < openSymbols.length ? ' (' + (openSymbols.length - unrealizedKnown) + ' mark price unavailable)' : '')
-        : '';
+      els.totalBreakdown.textContent =
+        'balance ' + fmtMoney(balance) +
+        (openSymbols.length ? ' · unrealized ' + fmtSigned(unrealized) + (unrealizedKnown < openSymbols.length ? ' (' + (openSymbols.length - unrealizedKnown) + ' mark price unavailable)' : '') : '') +
+        ' · margin used ' + fmtMoney(marginUsed) + ' · free ' + fmtMoney(Math.max(0, balance - marginUsed)) +
+        ' · ' + openSymbols.length + '/' + (account.maxOpenPositions || 3) + ' slots';
       els.startedValue.textContent = fmtMoney(started);
 
-      renderCoins(equity, positions, scores);
+      renderRules(account, openSymbols.length);
+      renderCoins(positions, scores, markPrices);
       renderOpenPositions(positions, markPrices);
       renderPerformance(trades, started);
       renderTrades(trades);

@@ -28,7 +28,14 @@ jobs:
       - name: Run bot
         run: node src/run.js
 
+      # Separate pooled 1000 USDT account (state/portfolio/) — runs even if
+      # the per-coin bot above failed, so one can't stall the other.
+      - name: Run portfolio account
+        if: ${{ !cancelled() }}
+        run: node src/portfolio.js
+
       - name: Commit updated state
+        if: ${{ !cancelled() }}
         run: |
           git config user.name "ultimate-trading-bot"
           git config user.email "actions@users.noreply.github.com"

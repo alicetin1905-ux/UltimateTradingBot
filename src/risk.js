@@ -8,13 +8,15 @@
 // the six coins without needing exchange credentials.
 const QTY_STEP = { BTCUSDT: 0.001, ETHUSDT: 0.01, SOLUSDT: 0.1, XRPUSDT: 1, BNBUSDT: 0.01, DOGEUSDT: 1 };
 
-function sizeFor({ symbol, equity, bias, entry, stop, riskPct, leverage, mmr = 0.005 }) {
+// maxMargin (optional) caps the margin this one position may tie up — the
+// pooled-balance portfolio uses it so several positions share one balance.
+function sizeFor({ symbol, equity, bias, entry, stop, riskPct, leverage, mmr = 0.005, maxMargin = Infinity }) {
   const risk = Math.abs(entry - stop);
   const step = QTY_STEP[symbol] || 0.001;
   const toStep = (q) => Math.floor(q / step + 1e-9) * step;
 
   let qty = (equity * riskPct / 100) / risk;
-  const maxQty = (equity * leverage) / entry;
+  const maxQty = (Math.min(equity, maxMargin) * leverage) / entry;
   const capped = qty > maxQty;
   if (capped) qty = maxQty;
   qty = toStep(qty);

@@ -1,0 +1,8 @@
+{
+  "balance": 1000,
+  "startingBalance": 1000,
+  "riskPct": 25,
+  "leverage": 10,
+  "maxOpenPositions": 3,
+  "updatedAt": 1790096515298
+}
