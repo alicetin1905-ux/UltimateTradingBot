@@ -10,5 +10,17 @@
   "DOGEUSDT:60": {
     "bias": 1,
     "price": 0.08696
+  },
+  "ETHUSDT:60": {
+    "bias": 1,
+    "price": 2758.02
+  },
+  "SOLUSDT:60": {
+    "bias": 1,
+    "price": 117.92
+  },
+  "BNBUSDT:60": {
+    "bias": 1,
+    "price": 791.4
   }
 }
