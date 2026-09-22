@@ -332,10 +332,12 @@
   }
 
   function renderRules(account, openCount) {
-    var max = account.maxOpenPositions || 3;
+    var max = account.maxOpenPositions || 4;
     els.rules.innerHTML =
-      '<span class="chip">Risk <b>' + (account.riskPct != null ? account.riskPct : '—') + '%</b> of balance / trade</span>' +
+      '<span class="chip">Margin <b>' + (account.marginPct != null ? account.marginPct : '—') + '%</b> of balance / trade</span>' +
       '<span class="chip">Leverage <b>' + (account.leverage != null ? account.leverage : '—') + 'x</b></span>' +
+      (account.marginPct != null && account.leverage != null
+        ? '<span class="chip">Position value <b>' + fmtMoney(account.balance * account.marginPct / 100 * account.leverage) + '</b> / trade</span>' : '') +
       '<span class="chip">Max <b>' + max + '</b> open positions</span>';
     var bars = '';
     for (var i = 0; i < max; i++) bars += '<span' + (i < openCount ? ' class="on"' : '') + '></span>';
@@ -690,7 +692,7 @@
         'balance ' + fmtMoney(balance) +
         (openSymbols.length ? ' · unrealized ' + fmtSigned(unrealized) + (unrealizedKnown < openSymbols.length ? ' (' + (openSymbols.length - unrealizedKnown) + ' mark price unavailable)' : '') : '') +
         ' · margin used ' + fmtMoney(marginUsed) + ' · free ' + fmtMoney(Math.max(0, balance - marginUsed)) +
-        ' · ' + openSymbols.length + '/' + (account.maxOpenPositions || 3) + ' slots';
+        ' · ' + openSymbols.length + '/' + (account.maxOpenPositions || 4) + ' slots';
       els.startedValue.textContent = fmtMoney(started);
 
       renderRules(account, openSymbols.length);

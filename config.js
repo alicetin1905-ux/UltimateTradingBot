@@ -49,8 +49,8 @@ module.exports = {
   // signals as above, but all six coins trade out of ONE shared balance.
   PORTFOLIO: {
     STARTING_BALANCE: 1000,  // USDT
-    RISK_PCT: 25,            // % of the current shared balance risked per trade
-    LEVERAGE: 10,
-    MAX_OPEN_POSITIONS: 3,
+    MARGIN_PCT: 25,          // % of the current shared balance put up as margin per trade
+    LEVERAGE: 10,            // position value = margin x leverage (250 USDT -> 2500 USDT)
+    MAX_OPEN_POSITIONS: 4,   // 4 x 25% = the whole balance
   },
 };

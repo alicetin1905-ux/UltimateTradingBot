@@ -3,11 +3,12 @@
 // per-coin one run.js manages. Same signals (ATLAS score, GoldenRatio
 // confluence, CRUCIBLE liquidity refinement, scaled T1/T2/T3 exit), but:
 //   - ONE shared balance (config.PORTFOLIO.STARTING_BALANCE) for all coins
-//   - risk config.PORTFOLIO.RISK_PCT of that current balance per trade
+//   - each trade puts up config.PORTFOLIO.MARGIN_PCT of the current balance
+//     as margin; position value = margin x LEVERAGE (the strategy's own stop
+//     and targets still decide where it exits)
 //   - at most config.PORTFOLIO.MAX_OPEN_POSITIONS open at once; when more
 //     coins qualify than there are free slots, the strongest |score| wins
-//   - no per-position margin cap: size comes from the risk %, limited only
-//     by the leverage and by whatever margin is still free
+//   - never more margin than is still free
 // State lives in state/portfolio/*.json, fully independent of state/*.json.
 //
 //   node src/portfolio.js          run once (scheduled by bot.yml)
@@ -35,7 +36,7 @@ function writeJson(name, data) {
   fs.writeFileSync(path.join(DIR, name + '.json'), JSON.stringify(data, null, 2) + '\n');
 }
 function freshAccount() {
-  return { balance: P.STARTING_BALANCE, startingBalance: P.STARTING_BALANCE, riskPct: P.RISK_PCT, leverage: P.LEVERAGE, maxOpenPositions: P.MAX_OPEN_POSITIONS };
+  return { balance: P.STARTING_BALANCE, startingBalance: P.STARTING_BALANCE, marginPct: P.MARGIN_PCT, leverage: P.LEVERAGE, maxOpenPositions: P.MAX_OPEN_POSITIONS };
 }
 function loadState() {
   return {
@@ -48,7 +49,8 @@ function loadState() {
 }
 function saveState(st) {
   // Settings are re-stamped every run so the dashboard always shows the live rules.
-  st.account.riskPct = P.RISK_PCT;
+  delete st.account.riskPct; // pre-MARGIN_PCT field
+  st.account.marginPct = P.MARGIN_PCT;
   st.account.leverage = P.LEVERAGE;
   st.account.maxOpenPositions = P.MAX_OPEN_POSITIONS;
   st.account.updatedAt = Date.now();
@@ -102,7 +104,7 @@ async function run() {
       const analysis = atlasScore.analyse({
         symbol, candles: data.candles, ticker: data.ticker, oi: data.oi, ratio: data.ratio,
         book: data.book, tape: data.tape, entryTf: config.ENTRY_TF, mtfTfs: config.MTF_TFS,
-        flipStore: st.flipEntries, account: st.account.balance, riskPct: P.RISK_PCT,
+        flipStore: st.flipEntries, account: st.account.balance, riskPct: P.MARGIN_PCT,
         leverage: P.LEVERAGE, scoreThreshold: config.SCORE_THRESHOLD,
       });
       if (!analysis) { events.push({ symbol, type: 'skip', reason: 'not enough candle history yet' }); continue; }
@@ -136,7 +138,7 @@ async function run() {
     const freeMargin = balance - usedMargin(st.positions);
     const plan = sizeFor({
       symbol: c.symbol, equity: balance, bias: c.analysis.bias, entry: c.analysis.plan.entry, stop: c.analysis.plan.stop,
-      riskPct: P.RISK_PCT, leverage: P.LEVERAGE,
+      leverage: P.LEVERAGE, marginPct: P.MARGIN_PCT,
       maxMargin: Math.max(0, freeMargin),
     });
     const opened = strategy.openEntry({ symbol: c.symbol, data: c.data, analysis: c.analysis, plan, fibCheck: c.fibCheck });
@@ -162,7 +164,7 @@ function reset() {
 /* ---------------- output ---------------- */
 
 function printSummary(events, st) {
-  console.log(`\n=== Portfolio (${P.STARTING_BALANCE} USDT pool, ${P.LEVERAGE}x, ${P.RISK_PCT}% risk, max ${P.MAX_OPEN_POSITIONS}) @ ${new Date().toISOString()} ===\n`);
+  console.log(`\n=== Portfolio (${P.STARTING_BALANCE} USDT pool, ${P.LEVERAGE}x, ${P.MARGIN_PCT}% margin/trade, max ${P.MAX_OPEN_POSITIONS}) @ ${new Date().toISOString()} ===\n`);
   for (const ev of events) {
     if (ev.type === 'enter') {
       console.log(`[${ev.symbol}] ENTER ${ev.bias === 1 ? 'LONG' : 'SHORT'} @ ${fmt(ev.entry)} | score ${ev.score} | SL ${fmt(ev.stop)} T1 ${fmt(ev.t1)} T2 ${fmt(ev.t2)} T3 ${fmt(ev.t3)} | qty ${ev.qty} margin $${fmt(ev.margin)} risk $${fmt(ev.riskAmt)}`);

@@ -116,13 +116,13 @@ main page). Same signals and exit rules as above, different money rules
 (`config.js` → `PORTFOLIO`):
 
 - **One shared 1000 USDT balance** for all six coins.
-- **Risk 25%** of the current shared balance per trade.
-- **10x leverage.**
-- **Max 3 open positions.** If more coins qualify than there are free
-  slots, the strongest |score| gets the slot. There's no per-position
-  margin cap: size comes from the 25% risk, limited only by the 10x leverage
-  and by whatever margin is still free. A big first trade can therefore use
-  up most of the margin and leave later slots unable to open.
+- **25% of the current balance as margin per trade**, at **10x leverage**:
+  on 1000 USDT each trade is 250 USDT margin = 2500 USDT position value.
+  The strategy's own stop/targets still decide the exit, so the loss at the
+  stop is 2500 x the stop distance (e.g. a 1.5% stop loses ~37.5 USDT).
+- **Max 4 open positions** (4 x 25% = the whole balance). If more coins
+  qualify than there are free slots, the strongest |score| gets the slot. A
+  trade never uses more margin than is still free.
 
 It runs in the same hourly workflow right after the per-coin bot (either can
 fail without stopping the other). Reset it with the "Reset portfolio

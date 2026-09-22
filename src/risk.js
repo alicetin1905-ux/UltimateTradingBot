@@ -10,12 +10,14 @@ const QTY_STEP = { BTCUSDT: 0.001, ETHUSDT: 0.01, SOLUSDT: 0.1, XRPUSDT: 1, BNBU
 
 // maxMargin (optional) caps the margin this one position may tie up — the
 // pooled-balance portfolio uses it so several positions share one balance.
-function sizeFor({ symbol, equity, bias, entry, stop, riskPct, leverage, mmr = 0.005, maxMargin = Infinity }) {
+// marginPct (optional) sizes by margin instead of risk: margin = marginPct%
+// of equity, position value = margin x leverage, whatever the stop distance.
+function sizeFor({ symbol, equity, bias, entry, stop, riskPct, leverage, mmr = 0.005, maxMargin = Infinity, marginPct = null }) {
   const risk = Math.abs(entry - stop);
   const step = QTY_STEP[symbol] || 0.001;
   const toStep = (q) => Math.floor(q / step + 1e-9) * step;
 
-  let qty = (equity * riskPct / 100) / risk;
+  let qty = marginPct != null ? (equity * marginPct / 100 * leverage) / entry : (equity * riskPct / 100) / risk;
   const maxQty = (Math.min(equity, maxMargin) * leverage) / entry;
   const capped = qty > maxQty;
   if (capped) qty = maxQty;
