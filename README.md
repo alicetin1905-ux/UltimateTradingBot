@@ -107,23 +107,3 @@ state/                  equity, open positions, closed-trade log, flip-entry mem
 Everything in the **Rules** section above is a value in `config.js` —
 `BALANCE_PER_SYMBOL`, `RISK_PCT`, `LEVERAGE`, `TARGET_SPLIT`, the score
 threshold, the fib thresholds per coin, and so on.
-
-## 1000 USDT portfolio account
-
-A second, fully separate paper account — `src/portfolio.js`, state in
-`state/portfolio/*.json`, dashboard at `portfolio.html` (linked from the
-main page). Same signals and exit rules as above, different money rules
-(`config.js` → `PORTFOLIO`):
-
-- **One shared 1000 USDT balance** for all six coins.
-- **25% of the current balance as margin per trade**, at **10x leverage**:
-  on 1000 USDT each trade is 250 USDT margin = 2500 USDT position value.
-  The strategy's own stop/targets still decide the exit, so the loss at the
-  stop is 2500 x the stop distance (e.g. a 1.5% stop loses ~37.5 USDT).
-- **Max 4 open positions** (4 x 25% = the whole balance). If more coins
-  qualify than there are free slots, the strongest |score| gets the slot. A
-  trade never uses more margin than is still free.
-
-It runs in the same hourly workflow right after the per-coin bot (either can
-fail without stopping the other). Reset it with the "Reset portfolio
-account" workflow (`.github/workflows/portfolio-reset.yml`).

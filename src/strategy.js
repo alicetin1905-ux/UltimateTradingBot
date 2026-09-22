@@ -104,8 +104,7 @@ function runSymbol({ symbol, data, state }) {
 function dirName(bias) { return bias === 1 ? 'long' : bias === -1 ? 'short' : 'flat'; }
 
 // Signal-side entry gates that don't depend on account size: GoldenRatio
-// confluence and the max-chase distance from the flip entry. Shared with the
-// pooled-balance runner (portfolio.js), which sizes the plan itself.
+// confluence and the max-chase distance from the flip entry.
 function entryFilters({ symbol, data, analysis }) {
   const fibCheck = fib.confluence({
     candles1h: data.candles[config.ENTRY_TF],

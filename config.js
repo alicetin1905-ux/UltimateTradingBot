@@ -44,13 +44,4 @@ module.exports = {
   // of all-or-nothing, and move the stop to breakeven once T1 fills so a
   // full round-trip back to entry can't turn a winner into a loser.
   TARGET_SPLIT: [0.40, 0.35, 0.25], // T1 / T2 / T3 shares, must sum to 1
-
-  // Separate pooled-balance account (src/portfolio.js, portfolio.html): same
-  // signals as above, but all six coins trade out of ONE shared balance.
-  PORTFOLIO: {
-    STARTING_BALANCE: 1000,  // USDT
-    MARGIN_PCT: 25,          // % of the current shared balance put up as margin per trade
-    LEVERAGE: 10,            // position value = margin x leverage (250 USDT -> 2500 USDT)
-    MAX_OPEN_POSITIONS: 4,   // 4 x 25% = the whole balance
-  },
 };
