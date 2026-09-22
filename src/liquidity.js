@@ -69,12 +69,16 @@ function refinePlan(plan, clustersInfo) {
   }
 
   // If T2 would overshoot a dense cluster sitting between entry and T2,
-  // pull T2 in just short of it — likelier to actually fill.
+  // pull T2 in just short of it — likelier to actually fill. Only when the
+  // pulled-in T2 still lies beyond T1: a cluster before T1 would otherwise
+  // drag T2 back toward entry, so T2 would fill below T1 right after it.
   if (targetCluster) {
     const betweenT2 = plan.bias === 1
       ? targetCluster.price > plan.entry && targetCluster.price < plan.t2
       : targetCluster.price < plan.entry && targetCluster.price > plan.t2;
-    if (betweenT2) out.t2 = plan.bias === 1 ? targetCluster.price * 0.998 : targetCluster.price * 1.002;
+    const pulledT2 = plan.bias === 1 ? targetCluster.price * 0.998 : targetCluster.price * 1.002;
+    const beyondT1 = plan.bias === 1 ? pulledT2 > plan.t1 : pulledT2 < plan.t1;
+    if (betweenT2 && beyondT1) out.t2 = pulledT2;
   }
   out.liqClusterNote = {
     stopNear: stopCluster ? stopCluster.price : null,
