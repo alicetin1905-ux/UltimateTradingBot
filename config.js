@@ -51,6 +51,6 @@ module.exports = {
     STARTING_BALANCE: 1000,  // USDT
     RISK_PCT: 25,            // % of the current shared balance risked per trade
     LEVERAGE: 10,
-    MAX_OPEN_POSITIONS: 3,   // margin per position is also capped at balance / 3 so all three fit
+    MAX_OPEN_POSITIONS: 3,
   },
 };

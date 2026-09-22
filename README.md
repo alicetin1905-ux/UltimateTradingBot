@@ -119,10 +119,10 @@ main page). Same signals and exit rules as above, different money rules
 - **Risk 25%** of the current shared balance per trade.
 - **10x leverage.**
 - **Max 3 open positions.** If more coins qualify than there are free
-  slots, the strongest |score| gets the slot. Each position's margin is
-  capped at balance / 3 (and at whatever margin is still free), so all three
-  slots can always be funded — on tight stops that cap, not the 25%, sets the
-  size, so actual risk per trade can come in under 25%.
+  slots, the strongest |score| gets the slot. There's no per-position
+  margin cap: size comes from the 25% risk, limited only by the 10x leverage
+  and by whatever margin is still free. A big first trade can therefore use
+  up most of the margin and leave later slots unable to open.
 
 It runs in the same hourly workflow right after the per-coin bot (either can
 fail without stopping the other). Reset it with the "Reset portfolio

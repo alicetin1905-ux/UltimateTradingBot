@@ -336,8 +336,7 @@
     els.rules.innerHTML =
       '<span class="chip">Risk <b>' + (account.riskPct != null ? account.riskPct : '—') + '%</b> of balance / trade</span>' +
       '<span class="chip">Leverage <b>' + (account.leverage != null ? account.leverage : '—') + 'x</b></span>' +
-      '<span class="chip">Max <b>' + max + '</b> open positions</span>' +
-      '<span class="chip">Margin cap <b>' + fmtMoney(account.balance / max) + '</b> / position</span>';
+      '<span class="chip">Max <b>' + max + '</b> open positions</span>';
     var bars = '';
     for (var i = 0; i < max; i++) bars += '<span' + (i < openCount ? ' class="on"' : '') + '></span>';
     els.slotBar.innerHTML = bars;

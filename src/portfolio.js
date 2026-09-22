@@ -6,8 +6,8 @@
 //   - risk config.PORTFOLIO.RISK_PCT of that current balance per trade
 //   - at most config.PORTFOLIO.MAX_OPEN_POSITIONS open at once; when more
 //     coins qualify than there are free slots, the strongest |score| wins
-//   - each position's margin is capped at balance / MAX_OPEN_POSITIONS (and
-//     at whatever margin is still free) so every slot can always be funded
+//   - no per-position margin cap: size comes from the risk %, limited only
+//     by the leverage and by whatever margin is still free
 // State lives in state/portfolio/*.json, fully independent of state/*.json.
 //
 //   node src/portfolio.js          run once (scheduled by bot.yml)
@@ -137,7 +137,7 @@ async function run() {
     const plan = sizeFor({
       symbol: c.symbol, equity: balance, bias: c.analysis.bias, entry: c.analysis.plan.entry, stop: c.analysis.plan.stop,
       riskPct: P.RISK_PCT, leverage: P.LEVERAGE,
-      maxMargin: Math.max(0, Math.min(freeMargin, balance / P.MAX_OPEN_POSITIONS)),
+      maxMargin: Math.max(0, freeMargin),
     });
     const opened = strategy.openEntry({ symbol: c.symbol, data: c.data, analysis: c.analysis, plan, fibCheck: c.fibCheck });
     if (!opened.position) { events.push({ symbol: c.symbol, type: 'hold', reason: opened.reason, score: c.analysis.score }); continue; }
