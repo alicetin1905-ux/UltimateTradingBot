@@ -989,5 +989,49 @@
     "openedAt": 1790118000000,
     "closedAt": 1790157600000,
     "score": 59
+  },
+  {
+    "symbol": "XRPUSDT",
+    "bias": 1,
+    "entry": 1.5721,
+    "exit": 1.5301971345000727,
+    "pnl": -605.8735322634501,
+    "reason": "stop hit",
+    "openedAt": 1790157600000,
+    "closedAt": 1790175600000,
+    "score": 42
+  },
+  {
+    "symbol": "BNBUSDT",
+    "bias": -1,
+    "entry": 785.3,
+    "exit": 777.0300548178429,
+    "pnl": 84.22112173508707,
+    "reason": "T1 hit, stop moved to breakeven",
+    "openedAt": 1790157600000,
+    "closedAt": 1790175600000,
+    "score": -28
+  },
+  {
+    "symbol": "BNBUSDT",
+    "bias": -1,
+    "entry": 785.3,
+    "exit": 768.7601096356859,
+    "pnl": 147.38696303640234,
+    "reason": "T2 hit",
+    "openedAt": 1790157600000,
+    "closedAt": 1790175600000,
+    "score": -28
+  },
+  {
+    "symbol": "BNBUSDT",
+    "bias": -1,
+    "entry": 785.3,
+    "exit": 760.4901644535289,
+    "pnl": 157.91460325328825,
+    "reason": "T3 hit, position closed",
+    "openedAt": 1790157600000,
+    "closedAt": 1790175600000,
+    "score": -28
   }
 ]
