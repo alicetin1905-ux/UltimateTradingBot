@@ -107,3 +107,10 @@ state/                  equity, open positions, closed-trade log, flip-entry mem
 Everything in the **Rules** section above is a value in `config.js` —
 `BALANCE_PER_SYMBOL`, `RISK_PCT`, `LEVERAGE`, `TARGET_SPLIT`, the score
 threshold, the fib thresholds per coin, and so on.
+
+## Chandelier Bot
+
+`chandelier-bot/` is a second, separate paper-trading bot: Chandelier Exit
+(everget, 4 / 2) + ZLSMA 38 + MACD 5/35/5 on 4H candles, with TradeBot's
+risk, stop and target rules and its own ntfy topic. See
+[`chandelier-bot/README.md`](chandelier-bot/README.md).

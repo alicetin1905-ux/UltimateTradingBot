@@ -5,7 +5,10 @@
   "description": "Paper-trading bot combining ATLAS's scoring engine, GoldenRatio's fib impulse confluence, and CRUCIBLE's liquidation-cluster model into one entry/SL/TP decision per coin.",
   "main": "src/run.js",
   "scripts": {
-    "start": "node src/run.js"
+    "start": "node src/run.js",
+    "chandelier": "node chandelier-bot/src/run.js",
+    "chandelier:backtest": "node chandelier-bot/scripts/backtest.js",
+    "test": "node --test chandelier-bot/test/*.test.js"
   },
   "engines": {
     "node": ">=18"
