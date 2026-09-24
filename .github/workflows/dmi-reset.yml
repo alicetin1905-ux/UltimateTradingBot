@@ -1,14 +1,13 @@
-name: Reset account
+name: Reset DMI bot account
 
 on:
   workflow_dispatch: {}
 
-# Needed so the job can commit the reset state/*.json files back to the repo.
 permissions:
   contents: write
 
 concurrency:
-  group: trading-bot-run
+  group: dmi-bot-run
   cancel-in-progress: false
 
 jobs:
@@ -22,17 +21,15 @@ jobs:
           node-version: '20'
 
       - name: Reset all coins
-        run: node src/reset.js
+        run: node dmi-bot/src/reset.js
 
       - name: Commit reset state
         run: |
-          git config user.name "ultimate-trading-bot"
+          git config user.name "dmi-toolbox-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add state/
+          git add dmi-bot/state/
           git diff --cached --quiet && echo "no state changes" && exit 0
-          git commit -m "Reset account via dashboard"
-          # The DMI bot commits to this branch too — rebase onto its latest
-          # commit (they never touch the same files) and retry.
+          git commit -m "Reset DMI bot account"
           for i in 1 2 3 4; do
             git pull --rebase && git push && exit 0
             sleep $((i * 5))
