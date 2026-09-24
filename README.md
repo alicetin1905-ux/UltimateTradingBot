@@ -23,13 +23,6 @@ account into one entry/stop/take-profit decision per coin:
   six coins, same 1H ATLAS score; this bot is effectively that board's
   signal running unattended instead of on a screen.
 
-## Sibling bot: DMI Toolbox
-
-`dmi-bot/` is a separate paper-trading bot that runs Chart0bserver's
-TradingView **DMI Toolbox Strategy** on the top 20 coins. It has its own
-balances, state, workflow (`.github/workflows/dmi-bot.yml`) and dashboard
-(`dmi-bot/index.html`). See [`dmi-bot/README.md`](dmi-bot/README.md).
-
 ## This is paper trading only
 
 **No API keys, no exchange account, no real orders.** The bot reads OKX's
