@@ -1045,5 +1045,52 @@
     "openedAt": 1790175600000,
     "closedAt": 1790254800000,
     "score": -27
+  },
+  {
+    "symbol": "BTCUSDT",
+    "bias": -1,
+    "entry": 83949.9,
+    "exit": 84440.8,
+    "qty": 0.23800000000000002,
+    "pnl": -116.83420000000208,
+    "reason": "signal-flip",
+    "openedAt": 1790175600000,
+    "closedAt": 1790272800000,
+    "score": -36
+  },
+  {
+    "symbol": "ETHUSDT",
+    "bias": -1,
+    "entry": 2654.91,
+    "exit": 2689.07,
+    "qty": 7.88,
+    "pnl": -269.1808000000024,
+    "reason": "signal-flip",
+    "openedAt": 1790175600000,
+    "closedAt": 1790272800000,
+    "score": -39
+  },
+  {
+    "symbol": "SOLUSDT",
+    "bias": -1,
+    "entry": 113.79,
+    "exit": 117.68240562706673,
+    "pnl": -428.16461897733944,
+    "reason": "stop hit",
+    "openedAt": 1790175600000,
+    "closedAt": 1790272800000,
+    "score": -46
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "bias": -1,
+    "entry": 0.09271,
+    "exit": 0.09667,
+    "qty": 94039,
+    "pnl": -372.3944400000005,
+    "reason": "signal-flip",
+    "openedAt": 1790175600000,
+    "closedAt": 1790272800000,
+    "score": -45
   }
 ]
