@@ -1033,5 +1033,17 @@
     "openedAt": 1790157600000,
     "closedAt": 1790175600000,
     "score": -28
+  },
+  {
+    "symbol": "XRPUSDT",
+    "bias": -1,
+    "entry": 1.5054,
+    "exit": 1.5019,
+    "qty": 8028,
+    "pnl": 28.09800000000047,
+    "reason": "signal-flip",
+    "openedAt": 1790175600000,
+    "closedAt": 1790254800000,
+    "score": -27
   }
 ]
