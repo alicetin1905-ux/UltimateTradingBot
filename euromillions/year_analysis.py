@@ -1,13 +1,14 @@
 """EuroMillions 2026 yıllık analiz.
 
-draws_2026.json içindeki tüm çekilişleri inceler: sıcak/soğuk sayılar,
+Bir çekiliş dosyasındaki (varsayılan draws_2026.json) tüm çekilişleri inceler: sıcak/soğuk sayılar,
 bekleyen (uzun süredir çıkmayan) sayılar, tek/çift, alt/üst, toplam,
 ardışık sayılar, tekrarlar, ±1-3 komşu deseni ve eşit dağılım (ki-kare) testi.
 
-Kullanım: python3 euromillions/year_analysis.py
+Kullanım: python3 euromillions/year_analysis.py [draws_5y.json]
 """
 import json
 import random
+import sys
 from collections import Counter
 from itertools import combinations
 from pathlib import Path
@@ -40,7 +41,8 @@ def pct(x):
 
 
 def main():
-    draws = json.loads((HERE / "draws_2026.json").read_text())[::-1]  # eskiden yeniye
+    fname = sys.argv[1] if len(sys.argv) > 1 else "draws_2026.json"
+    draws = json.loads((HERE / fname).read_text())[::-1]  # eskiden yeniye
     n = len(draws)
     print(f"{n} çekiliş: {draws[0]['date']} -> {draws[-1]['date']}\n")
 
@@ -94,7 +96,7 @@ def main():
     exp_nb, exp_any = baseline(5, 5, MAIN_MAX)
     print(f"\nBİR ÖNCEKİ ÇEKİLİŞTEN TEKRAR: ort {sum(repeats) / len(repeats):.2f} (teorik 0.50), "
           f"en az 1 tekrar {pct(sum(r > 0 for r in repeats) / len(repeats))} (teorik %42)")
-    print(f"±1-3 KOMŞU DESENİ (tüm yıl): ort {sum(nb) / len(nb):.2f} isabet (rastgele {exp_nb:.2f}), "
+    print(f"±1-3 KOMŞU DESENİ (tüm dönem): ort {sum(nb) / len(nb):.2f} isabet (rastgele {exp_nb:.2f}), "
           f"en az 1 isabet {pct(sum(h > 0 for h in nb) / len(nb))} (rastgele {pct(exp_any)})")
 
     # Sık çıkan ikililer
@@ -103,6 +105,28 @@ def main():
           ", ".join(f"{a}-{b}({c})" for (a, b), c in pairs.most_common(8)))
     sp = Counter(tuple(sorted(d["stars"])) for d in draws)
     print("EN SIK YILDIZ İKİLİLERİ:", ", ".join(f"{a}-{b}({c})" for (a, b), c in sp.most_common(5)))
+
+    years = sorted({d["date"][-4:] for d in draws})
+    if len(years) > 1:
+        year_persistence(draws, years)
+
+
+def year_persistence(draws, years):
+    """Bir yılın en sık 10 sayısı ertesi yıl da sık çıkıyor mu?"""
+    print("\nYILLARA GÖRE EN SIK 5 SAYI")
+    tops = {}
+    for y in years:
+        yd = [d for d in draws if d["date"].endswith(y)]
+        c = Counter(x for d in yd for x in d["main"])
+        tops[y] = (c, len(yd))
+        print(f"  {y} ({len(yd)} çekiliş):", ", ".join(f"{v}({k})" for v, k in c.most_common(5)))
+    print("SICAK SAYILAR ERTESİ YIL (önceki yılın en sık 10'u, sonraki yıldaki ortalama çıkışı)")
+    for a, b in zip(years, years[1:]):
+        ca, _ = tops[a]
+        cb, nb = tops[b]
+        hot = [v for v, _ in ca.most_common(10)]
+        print(f"  {a} sıcakları {b} içinde: ort {sum(cb[v] for v in hot) / 10:.1f} "
+              f"(her sayı için beklenen {nb * 5 / MAIN_MAX:.1f})")
 
 
 if __name__ == "__main__":
