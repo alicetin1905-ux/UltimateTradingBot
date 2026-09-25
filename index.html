@@ -114,6 +114,27 @@
   .chartTip .t1{ color:var(--text-tertiary); }
   .chartTip .t2{ font-weight:700; margin-top:1px; }
 
+  .btcCard{ background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px; }
+  .btcHead{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .btcHead .pair{ font-weight:700; font-size:14px; letter-spacing:0.02em; }
+  .btcHead .pairSub{ font-family:var(--mono); font-size:9.5px; color:var(--text-tertiary); margin-top:2px; letter-spacing:0.04em; }
+  .btcHead .px{ font-family:var(--mono); font-size:20px; font-weight:700; margin-top:6px; }
+  .btcHead .chg{ font-family:var(--mono); font-size:11.5px; font-weight:600; margin-left:6px; }
+  .btcControls{ display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
+  .seg{ display:inline-flex; background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:2px; }
+  .seg button{
+    background:none; border:0; color:var(--text-tertiary); font-family:var(--mono); font-size:10px;
+    padding:4px 8px; border-radius:6px; cursor:pointer; letter-spacing:0.03em;
+  }
+  .seg button.on{ background:var(--border); color:var(--text-primary); }
+  .btcChartWrap{ position:relative; margin-top:12px; }
+  .btcChartWrap svg{ display:block; width:100%; }
+  .btcChartWrap .chartTip{ transform:translate(-50%, 0); z-index:2; }
+  .btcChartWrap .chartTip .ohlc{ color:var(--text-secondary); margin-top:2px; white-space:pre; }
+  .btcLegend{ display:flex; gap:12px; flex-wrap:wrap; margin-top:8px; font-family:var(--mono); font-size:9.5px; color:var(--text-tertiary); }
+  .btcLegend:empty{ display:none; }
+  .btcLegend i{ display:inline-block; width:12px; height:0; border-top:1.5px dashed; vertical-align:middle; margin-right:5px; }
+
   .posGrid{ display:grid; grid-template-columns:1fr; gap:10px; }
   @media (min-width:560px){ .posGrid{ grid-template-columns:repeat(2, 1fr); } }
   .posCard{ background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px; }
@@ -194,6 +215,33 @@
 </div>
 
 <div class="grid" id="coinGrid"></div>
+
+<h2>BTC / USD</h2>
+<div class="btcCard">
+  <div class="btcHead">
+    <div>
+      <div class="pair">BTC / USD</div>
+      <div class="pairSub">OKX BTC-USDT perp · live candles</div>
+      <div class="px"><span id="btcPx">—</span><span class="chg flat" id="btcChg"></span></div>
+    </div>
+    <div class="btcControls">
+      <div class="seg" id="btcStyleSeg">
+        <button type="button" data-style="candles">Candles</button>
+        <button type="button" data-style="heikin">Heikin-Ashi</button>
+        <button type="button" data-style="hollow">Hollow</button>
+        <button type="button" data-style="line">Line</button>
+      </div>
+      <div class="seg" id="btcTfSeg">
+        <button type="button" data-tf="15m">15m</button>
+        <button type="button" data-tf="1H">1H</button>
+        <button type="button" data-tf="4H">4H</button>
+        <button type="button" data-tf="1D">1D</button>
+      </div>
+    </div>
+  </div>
+  <div class="btcChartWrap" id="btcChartWrap"><div class="empty">Loading…</div></div>
+  <div class="btcLegend" id="btcLegend"></div>
+</div>
 
 <h2>Performance</h2>
 <div class="statCard" id="perfCard"><div class="empty">Loading…</div></div>
@@ -554,6 +602,254 @@
     hitArea.addEventListener('touchend', hide);
   }
 
+  /* ---------------- BTC/USD price chart ----------------
+     Live OKX candles for BTC-USDT-SWAP (the same instrument the bot trades),
+     drawn as plain SVG in one of four styles. The SVG is sized to its
+     container's real pixel width (no preserveAspectRatio stretching) so the
+     axis text stays crisp, and redrawn on resize. If the bot has an open BTC
+     position its entry / stop / targets are overlaid as dashed levels. */
+  var BTC_PREF_KEY = 'ultimatetradingbot-btcchart-v1';
+  var BTC_CANDLES = 90;
+  var BTC_PRICE_H = 230, BTC_VOL_H = 44, BTC_GAP = 8, BTC_AXIS_W = 62, BTC_TIME_H = 16;
+  var btc = { style: 'candles', tf: '1H', candles: null, pos: null };
+
+  try {
+    var btcPref = JSON.parse(localStorage.getItem(BTC_PREF_KEY) || '{}');
+    if (btcPref.style) btc.style = btcPref.style;
+    if (btcPref.tf) btc.tf = btcPref.tf;
+  } catch (e) {}
+  function btcSavePref() {
+    try { localStorage.setItem(BTC_PREF_KEY, JSON.stringify({ style: btc.style, tf: btc.tf })); } catch (e) {}
+  }
+
+  async function fetchBtcCandles() {
+    var res = await fetch(OKX_BASE + '/api/v5/market/candles?instId=BTC-USDT-SWAP&bar=' + btc.tf + '&limit=' + BTC_CANDLES, { cache: 'no-store' });
+    var d = await res.json();
+    if (d.code !== '0' || !d.data) throw new Error('OKX candles: ' + (d.msg || 'bad response'));
+    // OKX returns newest first: [ts, o, h, l, c, vol, ...]
+    return d.data.map(function (r) {
+      return { t: +r[0], o: +r[1], h: +r[2], l: +r[3], c: +r[4], v: +r[5] };
+    }).reverse();
+  }
+
+  function toHeikinAshi(candles) {
+    var out = [];
+    candles.forEach(function (k, i) {
+      var c = (k.o + k.h + k.l + k.c) / 4;
+      var o = i === 0 ? (k.o + k.c) / 2 : (out[i - 1].o + out[i - 1].c) / 2;
+      out.push({ t: k.t, o: o, h: Math.max(k.h, o, c), l: Math.min(k.l, o, c), c: c, v: k.v });
+    });
+    return out;
+  }
+
+  function niceStep(range, ticks) {
+    var raw = range / ticks, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    var n = raw / mag;
+    return (n < 1.5 ? 1 : n < 3 ? 2 : n < 7 ? 5 : 10) * mag;
+  }
+
+  // Axis labels: time-of-day alone is ambiguous once the window spans days,
+  // so anything coarser than 15m leads with the date.
+  function fmtBtcTime(t) {
+    var d = new Date(t);
+    var day = d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    if (btc.tf === '1D') return day;
+    var hm = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+    return btc.tf === '15m' ? hm : day + ' ' + hm;
+  }
+
+  function renderBtcHeader() {
+    var raw = btc.candles;
+    if (!raw || !raw.length) return;
+    var last = raw[raw.length - 1].c, first = raw[0].o;
+    var chg = ((last - first) / first) * 100;
+    document.getElementById('btcPx').textContent = '$' + fmtPrice(last);
+    var chgEl = document.getElementById('btcChg');
+    chgEl.textContent = (chg >= 0 ? '+' : '') + chg.toFixed(2) + '% · ' + raw.length + ' × ' + btc.tf;
+    chgEl.className = 'chg ' + (chg > 0 ? 'up' : chg < 0 ? 'down' : 'flat');
+  }
+
+  function renderBtcChart() {
+    var wrap = document.getElementById('btcChartWrap');
+    var legend = document.getElementById('btcLegend');
+    if (!btc.candles || !btc.candles.length) return;
+    var raw = btc.candles;
+    var data = btc.style === 'heikin' ? toHeikinAshi(raw) : raw;
+
+    var W = Math.max(280, Math.round(wrap.clientWidth));
+    var H = BTC_PRICE_H + BTC_GAP + BTC_VOL_H + BTC_TIME_H;
+    var plotW = W - BTC_AXIS_W;
+    var n = data.length;
+    var slot = plotW / n;
+    var bodyW = Math.max(1, Math.min(10, slot * 0.64));
+
+    // y-range covers the candles plus any open-position levels that sit near them
+    var lo = Infinity, hi = -Infinity;
+    data.forEach(function (k) { if (k.l < lo) lo = k.l; if (k.h > hi) hi = k.h; });
+    var levels = [];
+    var pos = btc.pos;
+    if (pos) {
+      levels.push({ label: 'Entry', v: pos.entry, color: 'var(--bot)' });
+      levels.push({ label: 'Stop', v: pos.stop, color: 'var(--down)' });
+      ['t1', 't2', 't3'].forEach(function (k) {
+        if (pos[k] != null && !(pos.filled && pos.filled[k])) levels.push({ label: k.toUpperCase(), v: pos[k], color: 'var(--up)' });
+      });
+      levels.forEach(function (lv) { if (lv.v < lo) lo = lv.v; if (lv.v > hi) hi = lv.v; });
+    }
+    var pad = (hi - lo) * 0.06 || 1;
+    lo -= pad; hi += pad;
+
+    var x = function (i) { return i * slot + slot / 2; };
+    var y = function (v) { return 6 + (1 - (v - lo) / (hi - lo)) * (BTC_PRICE_H - 12); };
+    var maxVol = Math.max.apply(null, data.map(function (k) { return k.v; })) || 1;
+    var volTop = BTC_PRICE_H + BTC_GAP;
+    var vy = function (v) { return volTop + BTC_VOL_H - (v / maxVol) * BTC_VOL_H; };
+
+    var parts = [];
+
+    // recessive grid + right-hand price axis
+    var step = niceStep(hi - lo, 5);
+    for (var g = Math.ceil(lo / step) * step; g <= hi; g += step) {
+      var gy = y(g);
+      parts.push('<line x1="0" x2="' + plotW + '" y1="' + gy + '" y2="' + gy + '" stroke="var(--border)" stroke-width="1" />');
+      parts.push('<text x="' + (plotW + 8) + '" y="' + (gy + 3.5) + '" font-family="var(--mono)" font-size="10" fill="var(--text-tertiary)">' + Math.round(g).toLocaleString('en-US') + '</text>');
+    }
+    // time labels
+    var every = Math.max(1, Math.ceil(n / Math.max(2, Math.floor(plotW / 110))));
+    for (var ti = n - 1; ti >= 0; ti -= every) {
+      parts.push('<text x="' + x(ti) + '" y="' + (H - 3) + '" text-anchor="middle" font-family="var(--mono)" font-size="9.5" fill="var(--text-tertiary)">' + fmtBtcTime(data[ti].t) + '</text>');
+    }
+
+    // volume
+    data.forEach(function (k, i) {
+      var up = btc.style === 'hollow' ? (i === 0 || k.c >= raw[i - 1].c) : k.c >= k.o;
+      var top = vy(k.v);
+      parts.push('<rect x="' + (x(i) - bodyW / 2) + '" y="' + top + '" width="' + bodyW + '" height="' + Math.max(0.5, volTop + BTC_VOL_H - top) + '" fill="' + (up ? 'var(--up)' : 'var(--down)') + '" fill-opacity="0.28" />');
+    });
+
+    // price marks
+    if (btc.style === 'line') {
+      var pts = data.map(function (k, i) { return x(i) + ',' + y(k.c); });
+      var upOverall = data[n - 1].c >= data[0].c;
+      var col = upOverall ? 'var(--up)' : 'var(--down)';
+      parts.push('<defs><linearGradient id="btcArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + (upOverall ? '#35ffb0' : '#ff4d6a') + '" stop-opacity="0.22" /><stop offset="1" stop-color="' + (upOverall ? '#35ffb0' : '#ff4d6a') + '" stop-opacity="0" /></linearGradient></defs>');
+      parts.push('<path d="M' + x(0) + ',' + BTC_PRICE_H + ' L' + pts.join(' L') + ' L' + x(n - 1) + ',' + BTC_PRICE_H + ' Z" fill="url(#btcArea)" stroke="none" />');
+      parts.push('<path d="M' + pts.join(' L') + '" fill="none" stroke="' + col + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />');
+    } else {
+      data.forEach(function (k, i) {
+        var bull = k.c >= k.o;
+        var colorUp = btc.style === 'hollow' ? (i === 0 || k.c >= raw[i - 1].c) : bull;
+        var col = colorUp ? 'var(--up)' : 'var(--down)';
+        var cx = x(i);
+        var bTop = y(Math.max(k.o, k.c)), bBot = y(Math.min(k.o, k.c));
+        var bh = Math.max(1, bBot - bTop);
+        parts.push('<line x1="' + cx + '" x2="' + cx + '" y1="' + y(k.h) + '" y2="' + y(k.l) + '" stroke="' + col + '" stroke-width="1" />');
+        if (btc.style === 'hollow' && bull) {
+          parts.push('<rect x="' + (cx - bodyW / 2 + 0.5) + '" y="' + bTop + '" width="' + Math.max(1, bodyW - 1) + '" height="' + bh + '" fill="var(--panel)" stroke="' + col + '" stroke-width="1" />');
+        } else {
+          parts.push('<rect x="' + (cx - bodyW / 2) + '" y="' + bTop + '" width="' + bodyW + '" height="' + bh + '" rx="' + Math.min(1.5, bodyW / 4) + '" fill="' + col + '" />');
+        }
+      });
+    }
+
+    // open-position levels
+    levels.forEach(function (lv) {
+      var ly = y(lv.v);
+      parts.push('<line x1="0" x2="' + plotW + '" y1="' + ly + '" y2="' + ly + '" stroke="' + lv.color + '" stroke-width="1" stroke-dasharray="4,3" opacity="0.8" />');
+      parts.push('<text x="4" y="' + (ly - 3) + '" font-family="var(--mono)" font-size="9" fill="var(--text-secondary)">' + lv.label + ' ' + fmtPrice(lv.v) + '</text>');
+    });
+
+    // last-price tag on the axis (real close, even in Heikin-Ashi mode)
+    var lastC = raw[n - 1].c, lastUp = lastC >= raw[n - 1].o;
+    var ly2 = y(lastC);
+    parts.push('<line x1="0" x2="' + plotW + '" y1="' + ly2 + '" y2="' + ly2 + '" stroke="var(--text-tertiary)" stroke-width="1" stroke-dasharray="1,3" />');
+    parts.push('<rect x="' + (plotW + 2) + '" y="' + (ly2 - 8) + '" width="' + (BTC_AXIS_W - 2) + '" height="16" rx="4" fill="' + (lastUp ? 'var(--up)' : 'var(--down)') + '" />');
+    parts.push('<text x="' + (plotW + 8) + '" y="' + (ly2 + 3.5) + '" font-family="var(--mono)" font-size="10" font-weight="700" fill="var(--bg)">' + Math.round(lastC).toLocaleString('en-US') + '</text>');
+
+    // hover layer
+    parts.push('<g id="btcHover" opacity="0"><line id="btcCrossX" y1="0" y2="' + (volTop + BTC_VOL_H) + '" stroke="var(--text-tertiary)" stroke-width="1" stroke-dasharray="2,2" /><line id="btcCrossY" x1="0" x2="' + plotW + '" stroke="var(--text-tertiary)" stroke-width="1" stroke-dasharray="2,2" /></g>');
+    parts.push('<rect id="btcHit" x="0" y="0" width="' + plotW + '" height="' + (volTop + BTC_VOL_H) + '" fill="transparent" />');
+
+    wrap.innerHTML =
+      '<svg id="btcSvg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">' + parts.join('') + '</svg>' +
+      '<div class="chartTip" id="btcTip"><div class="t1" id="btcTipDate"></div><div class="t2" id="btcTipClose"></div><div class="ohlc" id="btcTipOhlc"></div></div>';
+
+    legend.innerHTML = levels.length
+      ? '<span>BTC ' + (pos.bias === 1 ? 'LONG' : 'SHORT') + ' open:</span>' +
+        '<span><i style="border-color:var(--bot)"></i>entry</span>' +
+        '<span><i style="border-color:var(--down)"></i>stop</span>' +
+        '<span><i style="border-color:var(--up)"></i>open targets</span>'
+      : '';
+
+    wireBtcHover(data, raw, x, y, slot, plotW);
+  }
+
+  function wireBtcHover(data, raw, x, y, slot, plotW) {
+    var svg = document.getElementById('btcSvg');
+    var hit = document.getElementById('btcHit');
+    var layer = document.getElementById('btcHover');
+    var cx = document.getElementById('btcCrossX'), cy = document.getElementById('btcCrossY');
+    var tip = document.getElementById('btcTip');
+    function move(clientX) {
+      var rect = svg.getBoundingClientRect();
+      var i = Math.max(0, Math.min(data.length - 1, Math.floor((clientX - rect.left) / slot)));
+      var k = data[i], r = raw[i];
+      var px = x(i), py = y(k.c);
+      cx.setAttribute('x1', px); cx.setAttribute('x2', px);
+      cy.setAttribute('y1', py); cy.setAttribute('y2', py);
+      layer.setAttribute('opacity', '1');
+      var chg = ((r.c - r.o) / r.o) * 100;
+      document.getElementById('btcTipDate').textContent = new Date(k.t).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      var closeEl = document.getElementById('btcTipClose');
+      closeEl.textContent = '$' + fmtPrice(r.c) + '  ' + (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%';
+      closeEl.className = 't2 ' + (chg >= 0 ? 'up' : 'down');
+      document.getElementById('btcTipOhlc').textContent =
+        'O ' + fmtPrice(r.o) + '  H ' + fmtPrice(r.h) + '  L ' + fmtPrice(r.l) +
+        (btc.style === 'heikin' ? '\nHA close ' + fmtPrice(k.c) : '');
+      var tipW = tip.offsetWidth || 180;
+      tip.style.left = Math.max(tipW / 2, Math.min(plotW - tipW / 2, px)) + 'px';
+      tip.style.top = '4px';
+      tip.style.opacity = '1';
+    }
+    function hide() { layer.setAttribute('opacity', '0'); tip.style.opacity = '0'; }
+    hit.addEventListener('mousemove', function (e) { move(e.clientX); });
+    hit.addEventListener('mouseleave', hide);
+    hit.addEventListener('touchstart', function (e) { if (e.touches[0]) move(e.touches[0].clientX); }, { passive: true });
+    hit.addEventListener('touchmove', function (e) { if (e.touches[0]) move(e.touches[0].clientX); }, { passive: true });
+    hit.addEventListener('touchend', hide);
+  }
+
+  function paintBtcControls() {
+    Array.prototype.forEach.call(document.querySelectorAll('#btcStyleSeg button'), function (b) { b.classList.toggle('on', b.getAttribute('data-style') === btc.style); });
+    Array.prototype.forEach.call(document.querySelectorAll('#btcTfSeg button'), function (b) { b.classList.toggle('on', b.getAttribute('data-tf') === btc.tf); });
+  }
+
+  async function refreshBtc() {
+    try {
+      btc.candles = await fetchBtcCandles();
+      renderBtcHeader();
+      renderBtcChart();
+    } catch (e) {
+      if (!btc.candles) document.getElementById('btcChartWrap').innerHTML = '<div class="empty">BTC chart unavailable: ' + e.message + '</div>';
+    }
+  }
+
+  document.getElementById('btcStyleSeg').addEventListener('click', function (e) {
+    var s = e.target.getAttribute && e.target.getAttribute('data-style');
+    if (!s || s === btc.style) return;
+    btc.style = s; btcSavePref(); paintBtcControls(); renderBtcChart();
+  });
+  document.getElementById('btcTfSeg').addEventListener('click', function (e) {
+    var tf = e.target.getAttribute && e.target.getAttribute('data-tf');
+    if (!tf || tf === btc.tf) return;
+    btc.tf = tf; btcSavePref(); paintBtcControls(); refreshBtc();
+  });
+  var btcResizeTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(btcResizeTimer);
+    btcResizeTimer = setTimeout(renderBtcChart, 120);
+  });
+
   /* ---------------- alerts: notify when the bot takes a new entry ----------------
      Diffs each poll's positions against the previous one — a symbol that has
      no position now but does after this fetch, or whose position's openedAt
@@ -625,6 +921,7 @@
 
   async function refresh() {
     els.refreshBtn.textContent = 'Loading…';
+    refreshBtc();
     try {
       var results = await Promise.all([
         fetchJson('equity'), fetchJson('positions'), fetchJson('trades'),
@@ -659,6 +956,8 @@
       els.startedValue.textContent = fmtMoney(started);
 
       renderCoins(equity, positions, scores);
+      btc.pos = positions.BTCUSDT || null;
+      renderBtcChart();
       renderOpenPositions(positions, markPrices);
       renderPerformance(trades, started);
       renderTrades(trades);
@@ -677,6 +976,7 @@
   els.alertsToggle.addEventListener('click', toggleWatch);
   watchLoad();
   paintWatchUi();
+  paintBtcControls();
   refresh();
   setInterval(refresh, 60000);
 })();
