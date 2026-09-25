@@ -1,35 +1,4 @@
 {
-  "BNBUSDT": {
-    "symbol": "BNBUSDT",
-    "bias": 1,
-    "entry": 776.6,
-    "stop": 765.9133537362097,
-    "initialStop": 765.9133537362097,
-    "t1": 787.2866462637903,
-    "t2": 797.9732925275806,
-    "t3": 808.6599387913709,
-    "qtyTotal": 27.990000000000002,
-    "qtyRemaining": 27.990000000000002,
-    "qtyT1": 11.196000000000002,
-    "qtyT2": 9.7965,
-    "qtyT3": 6.9975000000000005,
-    "margin": 2173.7034000000003,
-    "notional": 21737.034000000003,
-    "riskAmt": 299.11922892349037,
-    "filled": {
-      "t1": false,
-      "t2": false,
-      "t3": false
-    },
-    "breakeven": false,
-    "openedAt": 1790254800000,
-    "score": 52,
-    "fibImpulse": "up",
-    "liqClusterNote": {
-      "stopNear": 760.9288683333333,
-      "targetNear": 787.9224283333333
-    }
-  },
   "BTCUSDT": {
     "symbol": "BTCUSDT",
     "bias": 1,
