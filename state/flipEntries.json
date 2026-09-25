@@ -1,8 +1,4 @@
 {
-  "XRPUSDT:60": {
-    "bias": 1,
-    "price": 1.5019
-  },
   "SOLUSDT:60": {
     "bias": 1,
     "price": 120.69
@@ -14,5 +10,9 @@
   "BTCUSDT:60": {
     "bias": -1,
     "price": 83746.3
+  },
+  "BNBUSDT:60": {
+    "bias": -1,
+    "price": 772.5
   }
 }

@@ -91,5 +91,36 @@
       "stopNear": 112.81464058333334,
       "targetNear": 121.23649725000001
     }
+  },
+  "BNBUSDT": {
+    "symbol": "BNBUSDT",
+    "bias": -1,
+    "entry": 772.5,
+    "stop": 779.0756486815096,
+    "initialStop": 779.0756486815096,
+    "t1": 765.9243513184904,
+    "t2": 759.3487026369808,
+    "t3": 752.7730539554711,
+    "qtyTotal": 24.310000000000002,
+    "qtyRemaining": 24.310000000000002,
+    "qtyT1": 9.724000000000002,
+    "qtyT2": 8.5085,
+    "qtyT3": 6.077500000000001,
+    "margin": 1877.9475000000002,
+    "notional": 18779.475000000002,
+    "riskAmt": 159.85401944749887,
+    "filled": {
+      "t1": false,
+      "t2": false,
+      "t3": false
+    },
+    "breakeven": false,
+    "openedAt": 1790370000000,
+    "score": -27,
+    "fibImpulse": "down",
+    "liqClusterNote": {
+      "stopNear": 787.9224283333333,
+      "targetNear": 749.6815516666667
+    }
   }
 }
