@@ -1,14 +1,6 @@
 {
-  "SOLUSDT:60": {
-    "bias": 1,
-    "price": 120.69
-  },
-  "DOGEUSDT:60": {
-    "bias": 1,
-    "price": 0.09866
-  },
-  "XRPUSDT:60": {
-    "bias": 1,
-    "price": 1.5633
+  "BNBUSDT:60": {
+    "bias": -1,
+    "price": 771.6
   }
 }
