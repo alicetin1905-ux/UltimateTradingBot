@@ -1194,5 +1194,38 @@
     "openedAt": 1790370000000,
     "closedAt": 1790438400000,
     "score": -27
+  },
+  {
+    "symbol": "ETHUSDT",
+    "bias": 1,
+    "entry": 2690.25,
+    "exit": 2674.5195207462,
+    "pnl": -97.05705699594468,
+    "reason": "stop hit",
+    "openedAt": 1790438400000,
+    "closedAt": 1790456400000,
+    "score": 36
+  },
+  {
+    "symbol": "BNBUSDT",
+    "bias": -1,
+    "entry": 770.7,
+    "exit": 766.7332798926169,
+    "pnl": 37.96944486787141,
+    "reason": "T1 hit, stop moved to breakeven",
+    "openedAt": 1790445600000,
+    "closedAt": 1790456400000,
+    "score": -36
+  },
+  {
+    "symbol": "BNBUSDT",
+    "bias": -1,
+    "entry": 770.7,
+    "exit": 770.7,
+    "pnl": 0,
+    "reason": "breakeven stop hit",
+    "openedAt": 1790445600000,
+    "closedAt": 1790456400000,
+    "score": -36
   }
 ]
