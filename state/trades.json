@@ -1250,5 +1250,27 @@
     "openedAt": 1790467200000,
     "closedAt": 1790488800000,
     "score": 26
+  },
+  {
+    "symbol": "ETHUSDT",
+    "bias": 1,
+    "entry": 2692.19,
+    "exit": 2692.19,
+    "pnl": 0,
+    "reason": "breakeven stop hit",
+    "openedAt": 1790467200000,
+    "closedAt": 1790510400000,
+    "score": 26
+  },
+  {
+    "symbol": "SOLUSDT",
+    "bias": 1,
+    "entry": 120.69,
+    "exit": 124.06246819860785,
+    "pnl": 145.69062617985904,
+    "reason": "T1 hit, stop moved to breakeven",
+    "openedAt": 1790355600000,
+    "closedAt": 1790510400000,
+    "score": 92
   }
 ]
