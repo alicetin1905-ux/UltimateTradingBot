@@ -10,5 +10,13 @@
   "ETHUSDT:60": {
     "bias": 1,
     "price": 2692.19
+  },
+  "SOLUSDT:60": {
+    "bias": 1,
+    "price": 121.28
+  },
+  "BNBUSDT:60": {
+    "bias": 1,
+    "price": 774.3
   }
 }
