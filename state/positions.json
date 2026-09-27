@@ -60,5 +60,36 @@
       "stopNear": 1.5343451612500003,
       "targetNear": 1.4245140662500002
     }
+  },
+  "ETHUSDT": {
+    "symbol": "ETHUSDT",
+    "bias": -1,
+    "entry": 2683.12,
+    "stop": 2709.3221361039164,
+    "initialStop": 2709.3221361039164,
+    "t1": 2658.4607156484753,
+    "t2": 2652.4579039035,
+    "t3": 2609.1421469454262,
+    "qtyTotal": 5.96,
+    "qtyRemaining": 5.96,
+    "qtyT1": 2.384,
+    "qtyT2": 2.086,
+    "qtyT3": 1.49,
+    "margin": 1599.13952,
+    "notional": 15991.395199999999,
+    "riskAmt": 146.9693347350863,
+    "filled": {
+      "t1": false,
+      "t2": false,
+      "t3": false
+    },
+    "breakeven": false,
+    "openedAt": 1790542800000,
+    "score": -48,
+    "fibImpulse": "down",
+    "liqClusterNote": {
+      "stopNear": 2706.6155205833334,
+      "targetNear": 2647.16357675
+    }
   }
 }
