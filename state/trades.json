@@ -1383,5 +1383,16 @@
     "openedAt": 1790550000000,
     "closedAt": 1790604000000,
     "score": -35
+  },
+  {
+    "symbol": "BTCUSDT",
+    "bias": -1,
+    "entry": 83140.1,
+    "exit": 84144.58143493821,
+    "pnl": -192.8604355081357,
+    "reason": "stop hit",
+    "openedAt": 1790571600000,
+    "closedAt": 1790625600000,
+    "score": -52
   }
 ]
