@@ -1350,5 +1350,38 @@
     "openedAt": 1790550000000,
     "closedAt": 1790571600000,
     "score": -35
+  },
+  {
+    "symbol": "ETHUSDT",
+    "bias": -1,
+    "entry": 2683.12,
+    "exit": 2683.12,
+    "pnl": 0,
+    "reason": "breakeven stop hit",
+    "openedAt": 1790542800000,
+    "closedAt": 1790604000000,
+    "score": -48
+  },
+  {
+    "symbol": "XRPUSDT",
+    "bias": -1,
+    "entry": 1.5205,
+    "exit": 1.5205,
+    "pnl": 0,
+    "reason": "breakeven stop hit",
+    "openedAt": 1790445600000,
+    "closedAt": 1790604000000,
+    "score": -26
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "bias": -1,
+    "entry": 0.09686,
+    "exit": 0.09686,
+    "pnl": 0,
+    "reason": "breakeven stop hit",
+    "openedAt": 1790550000000,
+    "closedAt": 1790604000000,
+    "score": -35
   }
 ]
