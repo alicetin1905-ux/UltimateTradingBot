@@ -91,5 +91,36 @@
       "stopNear": 2651.2143968750006,
       "targetNear": 2726.9957206250006
     }
+  },
+  "XRPUSDT": {
+    "symbol": "XRPUSDT",
+    "bias": -1,
+    "entry": 1.4874,
+    "stop": 1.5207055076628482,
+    "initialStop": 1.5207055076628482,
+    "t1": 1.454094492337152,
+    "t2": 1.4273630943825002,
+    "t3": 1.3874834770114557,
+    "qtyTotal": 13249,
+    "qtyRemaining": 13249,
+    "qtyT1": 5299.6,
+    "qtyT2": 4637.15,
+    "qtyT3": 3312.25,
+    "margin": 1970.6562600000002,
+    "notional": 19706.5626,
+    "riskAmt": 441.2646710250748,
+    "filled": {
+      "t1": false,
+      "t2": false,
+      "t3": false
+    },
+    "breakeven": false,
+    "openedAt": 1790640000000,
+    "score": -25,
+    "fibImpulse": "down",
+    "liqClusterNote": {
+      "stopNear": 1.5465486162500004,
+      "targetNear": 1.4245140662500002
+    }
   }
 }
