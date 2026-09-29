@@ -65,13 +65,13 @@
     "symbol": "ETHUSDT",
     "bias": 1,
     "entry": 2681.98,
-    "stop": 2648.563182478126,
+    "stop": 2681.98,
     "initialStop": 2648.563182478126,
     "t1": 2713.7568844060866,
     "t2": 2721.5417291837507,
     "t3": 2777.3106532182596,
     "qtyTotal": 6.42,
-    "qtyRemaining": 6.42,
+    "qtyRemaining": 3.852,
     "qtyT1": 2.568,
     "qtyT2": 2.247,
     "qtyT3": 1.605,
@@ -79,11 +79,11 @@
     "notional": 17218.3116,
     "riskAmt": 204.00759788707558,
     "filled": {
-      "t1": false,
+      "t1": true,
       "t2": false,
       "t3": false
     },
-    "breakeven": false,
+    "breakeven": true,
     "openedAt": 1790625600000,
     "score": 46,
     "fibImpulse": "up",
@@ -121,6 +121,68 @@
     "liqClusterNote": {
       "stopNear": 1.5465486162500004,
       "targetNear": 1.4245140662500002
+    }
+  },
+  "BTCUSDT": {
+    "symbol": "BTCUSDT",
+    "bias": 1,
+    "entry": 83944.5,
+    "stop": 83125.16788303545,
+    "initialStop": 83125.16788303545,
+    "t1": 84763.83211696455,
+    "t2": 85583.1642339291,
+    "t3": 86402.49635089365,
+    "qtyTotal": 0.168,
+    "qtyRemaining": 0.168,
+    "qtyT1": 0.06720000000000001,
+    "qtyT2": 0.0588,
+    "qtyT3": 0.042,
+    "margin": 1410.2676000000001,
+    "notional": 14102.676000000001,
+    "riskAmt": 137.64779565004434,
+    "filled": {
+      "t1": false,
+      "t2": false,
+      "t3": false
+    },
+    "breakeven": false,
+    "openedAt": 1790665200000,
+    "score": 43,
+    "fibImpulse": "up",
+    "liqClusterNote": {
+      "stopNear": 83830.06082458334,
+      "targetNear": 84077.58954375001
+    }
+  },
+  "DOGEUSDT": {
+    "symbol": "DOGEUSDT",
+    "bias": 1,
+    "entry": 0.09499,
+    "stop": 0.0928567336706269,
+    "initialStop": 0.0928567336706269,
+    "t1": 0.09712326632937311,
+    "t2": 0.09925653265874622,
+    "t3": 0.10138979898811933,
+    "qtyTotal": 228904,
+    "qtyRemaining": 228904,
+    "qtyT1": 91561.6,
+    "qtyT2": 80116.4,
+    "qtyT3": 57226,
+    "margin": 2174.359096,
+    "notional": 21743.59096,
+    "riskAmt": 488.31319585882164,
+    "filled": {
+      "t1": false,
+      "t2": false,
+      "t3": false
+    },
+    "breakeven": false,
+    "openedAt": 1790665200000,
+    "score": 31,
+    "fibImpulse": "up",
+    "liqClusterNote": {
+      "stopNear": 0.09382149975000001,
+      "targetNear": 0.09576640058333336
     }
   }
 }

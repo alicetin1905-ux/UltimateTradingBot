@@ -1394,5 +1394,16 @@
     "openedAt": 1790571600000,
     "closedAt": 1790625600000,
     "score": -52
+  },
+  {
+    "symbol": "ETHUSDT",
+    "bias": 1,
+    "entry": 2681.98,
+    "exit": 2713.7568844060866,
+    "pnl": 81.60303915483023,
+    "reason": "T1 hit, stop moved to breakeven",
+    "openedAt": 1790625600000,
+    "closedAt": 1790665200000,
+    "score": 46
   }
 ]
